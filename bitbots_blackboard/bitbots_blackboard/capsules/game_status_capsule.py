@@ -57,6 +57,9 @@ class GameStatusCapsule:
     def get_opp_goals(self):
         return self.gamestate.rival_score
 
+    def get_goal_difference(self):
+        return self.gamestate.own_score - self.gamestate.rival_score
+
     def get_seconds_since_own_goal(self):
         return self.node.get_clock().now().nanoseconds / 1e9 - self.last_goal_from_us_time
 
