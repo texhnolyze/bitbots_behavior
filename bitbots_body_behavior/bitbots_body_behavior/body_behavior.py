@@ -1,21 +1,10 @@
 #!/usr/bin/env python3
 
-"""
-BehaviorModule
-^^^^^^^^^^^^^^
-.. moduleauthor:: Martin Poppinga <1popping@informatik.uni-hamburg.de>
-
-Starts the body behavior
-"""
-
-import os
 
 import rclpy
 import tf2_ros as tf2
-from ament_index_python import get_package_share_directory
 from bitbots_msgs.msg import GameState, RobotControlState, TeamData
 from bitbots_tf_listener import TransformListener
-from dynamic_stack_decider.dsd import DSD
 from geometry_msgs.msg import PoseWithCovarianceStamped, Twist, TwistWithCovarianceStamped
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.duration import Duration
@@ -25,8 +14,10 @@ from soccer_vision_3d_msgs.msg import RobotArray
 
 from bitbots_blackboard.blackboard import BodyBlackboard
 
+from .action_decider import ActionDecider
 
-class BodyDSD:
+
+class BodyBehavior:
     def __init__(self, node: Node):
         self.counter = 0
         self.step_running = False
@@ -35,83 +26,92 @@ class BodyDSD:
         self.tf_buffer = tf2.Buffer(cache_time=Duration(seconds=30))
         self.tf_listener = TransformListener(self.tf_buffer, node)
 
-        blackboard = BodyBlackboard(node, self.tf_buffer)
-        self.dsd = DSD(blackboard, "debug/dsd/body_behavior", node)  # TODO: use config
+        self.blackboard = BodyBlackboard(node, self.tf_buffer)
+        self.decider = ActionDecider(self.blackboard, self.node.get_logger())
+        self.setup_subscriptions()
 
-        dirname = get_package_share_directory("bitbots_body_behavior")
+    # def setup_dsd(self):
+    #     self.dsd = DSD(
+    #         self.blackboard, "debug/dsd/body_behavior", self.node
+    #     )  # TODO: use config
 
-        self.dsd.register_actions(os.path.join(dirname, "dsd_actions"))
-        self.dsd.register_decisions(os.path.join(dirname, "dsd_decisions"))
+    #     dirname = get_package_share_directory("bitbots_body_behavior")
+    #     self.dsd.register_actions(os.path.join(dirname, "dsd_actions"))
+    #     self.dsd.register_decisions(os.path.join(dirname, "dsd_decisions"))
+    #     dsd_file = (
+    #         self.node.get_parameter("dsd_file").get_parameter_value().string_value
+    #     )
+    #     self.dsd.load_behavior(os.path.join(dirname, dsd_file))
 
-        dsd_file = node.get_parameter("dsd_file").get_parameter_value().string_value
-        self.dsd.load_behavior(os.path.join(dirname, dsd_file))
-
-        node.create_subscription(
+    def setup_subscriptions(self):
+        self.node.create_subscription(
             PoseWithCovarianceStamped,
             "ball_position_relative_filtered",
-            blackboard.world_model.ball_filtered_callback,
+            self.blackboard.world_model.ball_filtered_callback,
             qos_profile=1,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        node.create_subscription(
+        self.node.create_subscription(
             GameState,
             "gamestate",
-            blackboard.gamestate.gamestate_callback,
+            self.blackboard.gamestate.gamestate_callback,
             qos_profile=1,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        node.create_subscription(
+        self.node.create_subscription(
             TeamData,
             "team_data",
-            blackboard.team_data.team_data_callback,
+            self.blackboard.team_data.team_data_callback,
             qos_profile=1,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        node.create_subscription(
+        self.node.create_subscription(
             PoseWithCovarianceStamped,
             "pose_with_covariance",
-            blackboard.world_model.pose_callback,
+            self.blackboard.world_model.pose_callback,
             qos_profile=1,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        node.create_subscription(
+        self.node.create_subscription(
             RobotArray,
             "robots_relative_filtered",
-            blackboard.costmap.robot_callback,
+            self.blackboard.costmap.robot_callback,
             qos_profile=1,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        node.create_subscription(
+        self.node.create_subscription(
             RobotControlState,
             "robot_state",
-            blackboard.misc.robot_state_callback,
+            self.blackboard.misc.robot_state_callback,
             qos_profile=1,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        node.create_subscription(
+        self.node.create_subscription(
             TwistWithCovarianceStamped,
-            node.get_parameter("body.ball_movement_subscribe_topic").get_parameter_value().string_value,
-            blackboard.world_model.ball_twist_callback,
+            self.blackboard.world_model.ball_twist_callback,
+            self.node.get_parameter("body.ball_movement_subscribe_topic").get_parameter_value().string_value,
+            self.blackboard.world_model.ball_twist_callback,
             qos_profile=1,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
-        node.create_subscription(
+        self.node.create_subscription(
             Twist,
             "cmd_vel",
-            blackboard.pathfinding.cmd_vel_cb,
+            self.blackboard.pathfinding.cmd_vel_cb,
             qos_profile=1,
             callback_group=MutuallyExclusiveCallbackGroup(),
         )
 
-    def loop(self):
+    def run(self):
         try:
-            self.dsd.update()
-            blackboard: BodyBlackboard = self.dsd.blackboard
-            blackboard.team_data.publish_strategy()
-            blackboard.team_data.publish_time_to_ball()
-            self.counter = (self.counter + 1) % blackboard.config["time_to_ball_divider"]
+            self.decider.decide()
+            self.decider.execute_ideal_action()
+
+            self.blackboard.team_data.publish_strategy()
+            self.blackboard.team_data.publish_time_to_ball()
+            self.counter = (self.counter + 1) % self.blackboard.config["time_to_ball_divider"]
             if self.counter == 0:
-                blackboard.pathfinding.calculate_time_to_ball()
+                self.blackboard.pathfinding.calculate_time_to_ball()
         except Exception as e:
             import traceback
 
@@ -122,8 +122,14 @@ class BodyDSD:
 def main(args=None):
     rclpy.init(args=None)
     node = Node("body_behavior", automatically_declare_parameters_from_overrides=True)
-    body_dsd = BodyDSD(node)
-    node.create_timer(1 / 60.0, body_dsd.loop, callback_group=MutuallyExclusiveCallbackGroup(), clock=node.get_clock())
+    body_behavior = BodyBehavior(node)
+    node.create_timer(
+        1 / 60.0,
+        body_behavior.run,
+        callback_group=MutuallyExclusiveCallbackGroup(),
+        clock=node.get_clock(),
+    )
+
     # Number of executor threads is the number of MutiallyExclusiveCallbackGroups + 2 threads needed by the tf listener and executor
     multi_executor = MultiThreadedExecutor(num_threads=12)
     multi_executor.add_node(node)
