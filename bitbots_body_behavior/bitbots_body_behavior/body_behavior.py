@@ -40,8 +40,8 @@ class BodyDSD:
 
         dirname = get_package_share_directory("bitbots_body_behavior")
 
-        self.dsd.register_actions(os.path.join(dirname, "actions"))
-        self.dsd.register_decisions(os.path.join(dirname, "decisions"))
+        self.dsd.register_actions(os.path.join(dirname, "dsd_actions"))
+        self.dsd.register_decisions(os.path.join(dirname, "dsd_decisions"))
 
         dsd_file = node.get_parameter("dsd_file").get_parameter_value().string_value
         self.dsd.load_behavior(os.path.join(dirname, dsd_file))
