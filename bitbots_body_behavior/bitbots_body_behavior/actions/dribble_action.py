@@ -14,4 +14,4 @@ class DribbleAction(Action):
         return random()
 
     def next_states_to_evaluate(self, state: State) -> list[State]:
-        return []
+        return [state]

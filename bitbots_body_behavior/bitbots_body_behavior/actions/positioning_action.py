@@ -21,4 +21,4 @@ class PositioningAction(Action):
         return total / highest
 
     def next_states_to_evaluate(self, state: State) -> list[State]:
-        return []
+        return [state]
