@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 import rclpy
 import tf2_ros as tf2
 from bitbots_msgs.msg import GameState, RobotControlState, TeamData
@@ -13,6 +12,8 @@ from rclpy.node import Node
 from soccer_vision_3d_msgs.msg import RobotArray
 
 from bitbots_blackboard.blackboard import BodyBlackboard
+from bitbots_body_behavior.evaluation import SyncEvaluator
+from bitbots_body_behavior.state.state import State
 
 from .action_decider import ActionDecider
 
@@ -27,8 +28,13 @@ class BodyBehavior:
         self.tf_listener = TransformListener(self.tf_buffer, node)
 
         self.blackboard = BodyBlackboard(node, self.tf_buffer)
-        self.decider = ActionDecider(self.blackboard, self.node.get_logger())
+
+        self.setup_action_decider()
         self.setup_subscriptions()
+
+    def setup_action_decider(self):
+        state = State(self.blackboard)
+        self.decider = ActionDecider(self.blackboard, state, SyncEvaluator(), self.node.get_logger())
 
     # def setup_dsd(self):
     #     self.dsd = DSD(
