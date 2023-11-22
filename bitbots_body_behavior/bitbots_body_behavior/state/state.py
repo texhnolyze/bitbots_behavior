@@ -3,23 +3,35 @@ from bitbots_blackboard.blackboard import BodyBlackboard
 
 class State:
     def __init__(self, blackboard: BodyBlackboard) -> None:
-        self.distance_to_ball = blackboard.world_model.get_ball_distance()
-        self.angle_to_ball = blackboard.world_model.get_ball_angle()
-        self.ball_position_xy = blackboard.world_model.get_ball_position_xy()
-        self.get_map_based_opp_goal_center_uv = blackboard.world_model.get_map_based_opp_goal_center_uv()
-        self.get_map_based_opp_goal_center_xy = blackboard.world_model.get_map_based_opp_goal_center_xy()
-        self.get_map_based_own_goal_center_uv = blackboard.world_model.get_map_based_own_goal_center_uv()
-        self.get_map_based_own_goal_center_xy = blackboard.world_model.get_map_based_own_goal_center_xy()
-        self.get_map_based_opp_goal_distance = blackboard.world_model.get_map_based_opp_goal_distance()
-        self.get_current_position = blackboard.world_model.get_current_position()
-        self.calculate_time_to_ball = blackboard.pathfinding.calculate_time_to_ball()
-        self.get_own_goals = blackboard.gamestate.get_own_goals()
-        self.get_seconds_remaining = blackboard.gamestate.get_seconds_remaining()
-        self.get_red_cards = blackboard.gamestate.get_red_cards()
-        self.get_goal_difference = blackboard.gamestate.get_goal_difference()
-        self.get_role = blackboard.team_data.get_role()
-        self.get_active_teammate_poses = blackboard.team_data.get_active_teammate_poses()
-        self.team_rank_to_ball = blackboard.team_data.team_rank_to_ball(self.distance_to_ball)
+        self.blackboard = blackboard
+
+    def update(self) -> None:
+        # own properties
+        self.current_position = self.blackboard.world_model.get_current_position()
+
+        # ball properties
+        self.distance_to_ball = self.blackboard.world_model.get_ball_distance()
+        self.ball_position_xy = self.blackboard.world_model.get_ball_position_xy()
+        self.angle_to_ball = self.blackboard.world_model.get_ball_angle()
+        self.time_to_ball = self.blackboard.pathfinding.calculate_time_to_ball()
+
+        # opponent goal properties
+        self.map_based_opp_goal_distance = self.blackboard.world_model.get_map_based_opp_goal_distance()
+        self.map_based_opp_goal_center_uv = self.blackboard.world_model.get_map_based_opp_goal_center_uv()
+        self.map_based_opp_goal_center_xy = self.blackboard.world_model.get_map_based_opp_goal_center_xy()
+        self.map_based_own_goal_center_uv = self.blackboard.world_model.get_map_based_own_goal_center_uv()
+        self.map_based_own_goal_center_xy = self.blackboard.world_model.get_map_based_own_goal_center_xy()
+
+        # gamestate properties
+        self.role = self.blackboard.team_data.get_role()
+        self.own_goals = self.blackboard.gamestate.get_own_goals()
+        self.goal_difference = self.blackboard.gamestate.get_goal_difference()
+        self.seconds_remaining = self.blackboard.gamestate.get_seconds_remaining()
+        self.red_cards = self.blackboard.gamestate.get_red_cards()
+
+        # additional properties
+        self.active_teammate_poses = self.blackboard.team_data.get_active_teammate_poses()
+        self.rank_to_ball = self.blackboard.team_data.team_rank_to_ball(self.distance_to_ball)
 
         # Potentially interesting for future states
         # self.get_ball_goal = blackboard.pathfinding.get_ball_goal(BallGoalType.MAP)

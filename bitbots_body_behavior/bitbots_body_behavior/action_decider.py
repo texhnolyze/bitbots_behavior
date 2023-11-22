@@ -56,7 +56,7 @@ class ActionDecider:
         ]
 
     def update_state(self):
-        self.state = State(self.blackboard)
+        self.state.update()
         self.evaluator = Evaluator(self.state)
         self.fulfilled_needs = self.needs.available()
 
