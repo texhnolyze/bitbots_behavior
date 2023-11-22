@@ -19,6 +19,8 @@ class State:
         self.get_goal_difference = blackboard.gamestate.get_goal_difference()
         self.get_role = blackboard.team_data.get_role()
         self.get_active_teammate_poses = blackboard.team_data.get_active_teammate_poses()
-        # self.team_rank_to_ball = blackboard.team_data.team_rank_to_ball()
-        # self.get_ball_goal = blackboard.pathfinding.get_ball_goal()
+        self.team_rank_to_ball = blackboard.team_data.team_rank_to_ball(self.distance_to_ball)
+
+        # Potentially interesting for future states
+        # self.get_ball_goal = blackboard.pathfinding.get_ball_goal(BallGoalType.MAP)
         # self.time_from_pose_to_pose = blackboard.pathfinding.time_from_pose_to_pose()
