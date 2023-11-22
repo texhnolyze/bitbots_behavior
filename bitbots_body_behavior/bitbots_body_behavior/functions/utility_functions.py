@@ -67,16 +67,15 @@ class SigmoidUF(UtilityFunction):
 
 class NormVerteilungUF(UtilityFunction):
     @staticmethod
-    def setup(factor: float = 1.0, sigma: float = 0.1):
-        return NormVerteilungUF(factor, sigma)
+    def setup(sigma: float = 0.1):
+        return NormVerteilungUF(sigma)
 
-    def __init__(self, factor: float, sigma: float = 0.1):
-        self.factor = factor
+    def __init__(self, sigma: float = 0.1):
         if sigma != 0:
             self.sigma = sigma
         else:
             self.sigma = 0.1
-        self.f = lambda x: 1 / (self.sigma * math.sqrt(2 * math.pi)) * math.e**-0.5(x / self.sigma) ** 2
+        self.f = lambda x: 1 / (self.sigma * math.sqrt(2 * math.pi)) * math.e ** (-0.5 * (x / self.sigma) ** 2)
 
     def apply(self, x):
         return self.f(x) / self.f(0)
