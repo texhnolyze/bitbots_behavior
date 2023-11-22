@@ -88,7 +88,6 @@ class BodyBehavior:
         )
         self.node.create_subscription(
             TwistWithCovarianceStamped,
-            self.blackboard.world_model.ball_twist_callback,
             self.node.get_parameter("body.ball_movement_subscribe_topic").get_parameter_value().string_value,
             self.blackboard.world_model.ball_twist_callback,
             qos_profile=1,
