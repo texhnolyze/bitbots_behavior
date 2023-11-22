@@ -1,3 +1,5 @@
+from typing import Optional
+
 from bitbots_body_behavior.state.needs import Needs
 from bitbots_body_behavior.state.state import State
 
@@ -9,7 +11,7 @@ class Action:
     def execute(self, new_state: State):
         raise NotImplementedError
 
-    def evaluate(self, state: State, new_state: State) -> float:
+    def evaluate(self, state: State, new_state: Optional[State]) -> float:
         raise NotImplementedError
 
     def next_states_to_evaluate(self, state: State) -> list[State]:

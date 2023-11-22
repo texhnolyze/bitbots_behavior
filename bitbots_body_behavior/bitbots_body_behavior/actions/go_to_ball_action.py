@@ -1,5 +1,5 @@
-from random import random
-
+from bitbots_body_behavior.functions.combinators import AndCombinator, NaturalLogarithm, OrCombinator, Prioritization
+from bitbots_body_behavior.functions.utility_functions import ExponentialUF, LinearUF, PiecewiseUF
 from bitbots_body_behavior.state.needs import Need, Needs
 from bitbots_body_behavior.state.state import State
 
@@ -10,8 +10,25 @@ class GoToBallAction(Action):
     def __init__(self, needs: Needs):
         self.needs: list[Need] = [needs.ABLE_TO_MOVE]
 
-    def evaluate(self, state: State, new_state: State) -> float:
-        return random()
+    def evaluate(self, state: State) -> float:
+        # Block1 der Rolle und allgemeinen Ballposition
+        offensive_mapping = PiecewiseUF.setup(LinearUF.setup(0, 0), 0.5, 0.5)
+        ball_position = ExponentialUF.setup(1, 1, 1)
+        combinator_eins = NaturalLogarithm.apply([offensive_mapping, ball_position], 5)
+
+        # Block2 Winkel und Distanz
+        ball_angle = ExponentialUF.setup()
+        ball_distance = ExponentialUF.setup()
+        combinator_zwei = AndCombinator.apply([ball_angle, ball_distance])
+
+        combinator_b1_b2 = Prioritization.apply([combinator_eins, combinator_zwei], [2, 8])
+
+        # Block3 Spielsituation
+        goal_difference = ExponentialUF.setup()
+        seconds_remaining = ExponentialUF.setup()
+        combinator_drei = Prioritization.apply([goal_difference, seconds_remaining], [9, 1])
+
+        return OrCombinator.apply([combinator_b1_b2, combinator_drei])
 
     def next_states_to_evaluate(self, state: State) -> list[State]:
         return []

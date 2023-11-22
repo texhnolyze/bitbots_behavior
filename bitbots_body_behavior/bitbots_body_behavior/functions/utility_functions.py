@@ -1,5 +1,6 @@
 import math
 
+
 class UtilityFunction:
     def apply(self):
         raise NotImplementedError
@@ -49,33 +50,33 @@ class ExponentialUF(UtilityFunction):
 
     def apply(self, x):
         return (self.factor * x) ** self.exponent / self.max_x
-    
+
 
 class SigmoidUF(UtilityFunction):
     @staticmethod
     def setup(position_x_axis: float = 1.0):
         return SigmoidUF(position_x_axis)
-    
+
     def __init__(self, position_x_axis: float = 0):
         self.e = math.e
         self.position_x_axis = position_x_axis
-       
 
-    def apply(self,x): 
-        return 1/(1+(self.e)**-(x+self.position_x_axis))
-    
+    def apply(self, x):
+        return 1 / (1 + (self.e) ** -(x + self.position_x_axis))
+
+
 class NormVerteilungUF(UtilityFunction):
     @staticmethod
     def setup(factor: float = 1.0, sigma: float = 0.1):
         return NormVerteilungUF(factor, sigma)
-    
+
     def __init__(self, factor: float, sigma: float = 0.1):
         self.factor = factor
         if sigma != 0:
             self.sigma = sigma
         else:
             self.sigma = 0.1
-        self.f = lambda x: 1/(self.sigma*math.sqrt(2*math.pi))*math.e**-0.5(x/self.sigma)**2
+        self.f = lambda x: 1 / (self.sigma * math.sqrt(2 * math.pi)) * math.e**-0.5(x / self.sigma) ** 2
 
-    def apply(self, x):     
-        return self.f(x)/self.f(0)
+    def apply(self, x):
+        return self.f(x) / self.f(0)
