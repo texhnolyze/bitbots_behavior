@@ -8,15 +8,16 @@ class UtilityFunction:
 
 class LinearUF(UtilityFunction):
     @staticmethod
-    def setup(factor: float = 1.0, max_x: float = 1.0):
-        return LinearUF(factor, max_x)
+    def setup(factor: float = 1.0, max_x: float = 1.0, y: float = 0):
+        return LinearUF(factor, max_x, y)
 
-    def __init__(self, factor: float, max_x: float):
+    def __init__(self, factor: float, max_x: float, y: float):
         self.factor = factor
+        self.y = y
         self.max_x = max_x
 
     def apply(self, x):
-        return self.factor * x / self.max_x
+        return self.factor / self.max_x * x + self.y
 
 
 class PiecewiseUF(UtilityFunction):

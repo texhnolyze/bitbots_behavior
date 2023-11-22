@@ -23,15 +23,17 @@ class GoToBallAction(Action):
         combinator_eins = NaturalLogarithm.apply([offensive_mapping, ball_position], 5)
 
         # Block2 Winkel und Distanz
-        ball_angle = NormVerteilungUF.setup()
+        ball_angle = NormVerteilungUF.setup(0.25)
         ball_distance = EulerExponentialUF.setup(1, -1, 1)
-        combinator_zwei = AndCombinator.apply([ball_angle, ball_distance.apply(self, state.distance_to_ball)])
+        combinator_zwei = AndCombinator.apply(
+            [ball_angle.apply(self, state.angle_to_ball), ball_distance.apply(self, state.distance_to_ball)]
+        )
 
         combinator_b1_b2 = Prioritization.apply([combinator_eins, combinator_zwei], [2, 8])
 
         # Block3 Spielsituation
-        goal_difference = ExponentialUF.setup()
-        seconds_remaining = ExponentialUF.setup()
+        goal_difference = PiecewiseUF.setup(LinearUF.setup(-1, 8, 0.5), 4, -4)
+        seconds_remaining = PiecewiseUF.setup(LinearUF.setup(-1, 30, 1), 30, 0)
         combinator_drei = Prioritization.apply([goal_difference, seconds_remaining], [9, 1])
 
         return OrCombinator.apply([combinator_b1_b2, combinator_drei])
