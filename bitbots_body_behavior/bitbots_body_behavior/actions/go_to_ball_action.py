@@ -1,5 +1,11 @@
 from bitbots_body_behavior.functions.combinators import AndCombinator, NaturalLogarithm, OrCombinator, Prioritization
-from bitbots_body_behavior.functions.utility_functions import ExponentialUF, LinearUF, PiecewiseUF
+from bitbots_body_behavior.functions.utility_functions import (
+    EulerExponentialUF,
+    ExponentialUF,
+    LinearUF,
+    NormVerteilungUF,
+    PiecewiseUF,
+)
 from bitbots_body_behavior.state.needs import Need, Needs
 from bitbots_body_behavior.state.state import State
 
@@ -17,9 +23,9 @@ class GoToBallAction(Action):
         combinator_eins = NaturalLogarithm.apply([offensive_mapping, ball_position], 5)
 
         # Block2 Winkel und Distanz
-        ball_angle = ExponentialUF.setup()
-        ball_distance = ExponentialUF.setup()
-        combinator_zwei = AndCombinator.apply([ball_angle, ball_distance])
+        ball_angle = NormVerteilungUF.setup()
+        ball_distance = EulerExponentialUF.setup(1, -1, 1)
+        combinator_zwei = AndCombinator.apply([ball_angle, ball_distance.apply(self, state.distance_to_ball)])
 
         combinator_b1_b2 = Prioritization.apply([combinator_eins, combinator_zwei], [2, 8])
 

@@ -49,7 +49,21 @@ class ExponentialUF(UtilityFunction):
         self.max_x = max_x
 
     def apply(self, x):
-        return (self.factor * x) ** self.exponent / self.max_x
+        return self.factor * x**self.exponent / self.max_x
+
+
+class EulerExponentialUF(UtilityFunction):
+    @staticmethod
+    def setup(factor: float = 1.0, exponent_factor: float = 1.0, max_x: float = 1.0):
+        return ExponentialUF(factor, exponent_factor, max_x)
+
+    def __init__(self, factor: float, exponent_factor: float, max_x: float):
+        self.factor = factor
+        self.exponent_factor = exponent_factor
+        self.max_x = max_x
+
+    def apply(self, x):
+        return self.factor * math.e ** (self.exponent_factor * x) / self.max_x
 
 
 class SigmoidUF(UtilityFunction):
