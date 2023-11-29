@@ -1,6 +1,4 @@
-import functools
-import itertools
-from typing import Iterable, Optional
+from typing import Optional
 
 from rclpy.impl.rcutils_logger import RcutilsLogger as Logger
 
@@ -44,18 +42,14 @@ class ActionDecider:
         self.fulfilled_needs = self.needs.available()
 
     def decide(self):
-        def flat_map(f, args):
-            return functools.reduce(lambda a, b: itertools.chain(a, b), map(f, args))
-
         self.update_state()
 
-        possible_actions = filter(lambda a: self.fulfilled_needs <= a.needs, self.actions)
+        possible_actions = list(filter(self.are_actions_needs_fulfilled, self.actions))
+        needed_evaluations = list(map(self.evaluation_from_action, possible_actions))
+        results = list(self.evaluator.evaluate_actions(needed_evaluations))
 
-        needed_evaluations = flat_map(self.split_into_evaluation_parts, possible_actions)
-        split_results = list(self.evaluator.evaluate_actions(needed_evaluations))
-
-        if len(split_results):
-            ideal_action = max(split_results, key=lambda item: item[2])
+        if len(results):
+            ideal_action = max(results, key=lambda item: item[2])
             self.next_action = ideal_action
 
             self.logger.info(f"Ideal action: {ideal_action[0]}, max_score: {ideal_action[2]}, {ideal_action[1]})")
@@ -65,9 +59,12 @@ class ActionDecider:
             self.logger.info(f"Executing ideal action: {self.next_action[0]}")
             # self.next_action[0].execute(self.next_action[2])
 
-    def split_into_evaluation_parts(self, action: Action) -> Iterable[Evaluation]:
-        new_states = action.next_states_to_evaluate(self.state)
-        parts = [
-            new_states[i : i + self.max_parallel_states] for i in range(0, len(new_states), self.max_parallel_states)
-        ]
-        return map(lambda part: (action, self.state, part), parts)
+    def evaluation_from_action(self, action: Action) -> Evaluation:
+        print(f"evaluation from action: {action}")
+        next_states = action.next_states_to_evaluate(self.state)
+
+        return (action, self.state, next_states)
+
+    def are_actions_needs_fulfilled(self, action: Action) -> bool:
+        print(f"filter: {all(need in self.fulfilled_needs for need in action.needs)}")
+        return all(need in self.fulfilled_needs for need in action.needs)
