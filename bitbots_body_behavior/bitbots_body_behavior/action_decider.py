@@ -33,8 +33,8 @@ class ActionDecider:
     def setup_actions(self) -> list[Action]:
         return [
             GoToBallAction(self.needs),
-            DribbleAction(self.needs),
-            PositioningAction(self.needs),
+            # DribbleAction(self.needs),
+            # PositioningAction(self.needs),
         ]
 
     def update_state(self):
@@ -57,7 +57,7 @@ class ActionDecider:
     def execute_ideal_action(self):
         if self.next_action:
             self.logger.info(f"Executing ideal action: {self.next_action[0]}")
-            # self.next_action[0].execute(self.next_action[2])
+            self.next_action[0].execute(self.blackboard, self.next_action[2])
 
     def evaluation_from_action(self, action: Action) -> Evaluation:
         print(f"evaluation from action: {action}")

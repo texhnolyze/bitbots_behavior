@@ -11,7 +11,7 @@ class DribbleAction(Action):
         self.needs: list[Need] = [needs.ABLE_TO_MOVE]
 
     def evaluate(self, state: State, new_state: State) -> float:
-        return random()
+        return 0
 
     def next_states_to_evaluate(self, state: State) -> list[State]:
         return [state]
