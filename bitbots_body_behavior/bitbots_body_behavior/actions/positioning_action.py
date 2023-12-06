@@ -75,22 +75,15 @@ class PositioningAction(Action):
         # generate the next possible positions in a circle around the current position
         # with an offset of 0.5m in each direction 0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°
         walk_distance = 0.5
-        potential_future_positions = self.generate_potential_positions(state.current_position, walk_distance)
-        next_positions = np.empty((0, 3))
+        potential_future_positions = np.array(self.generate_potential_positions(state.current_position, walk_distance))
+        teammate_positions = np.array(state.active_teammate_poses)
 
-        for own_position in potential_future_positions:
-            in_walking_distance = False
+        distances_to_teammates = np.linalg.norm(
+            potential_future_positions - teammate_positions[:, np.newaxis, :], axis=2
+        )
+        distance_to_next_teammate = np.min(distances_to_teammates, axis=0)
 
-            for teammate_position in state.active_teammate_poses:
-                distance_to_teammate = np.linalg.norm(np.array(own_position) - np.array(teammate_position))
-
-                if distance_to_teammate < walk_distance:
-                    in_walking_distance = True
-                    break
-
-            if not in_walking_distance:
-                next_positions = np.vstack((next_positions, own_position))
-
+        next_positions = potential_future_positions[distance_to_next_teammate > walk_distance]
         return list(map(state.set_current_position, next_positions))
 
     def generate_potential_positions(self, current_position: Point, distance: float = 1.0) -> list[Point]:
