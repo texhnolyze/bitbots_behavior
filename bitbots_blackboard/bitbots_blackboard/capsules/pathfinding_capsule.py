@@ -91,7 +91,7 @@ class PathfindingCapsule:
         msg.angular.x = -1.0
         self.direct_cmd_vel_pub.publish(msg)
 
-    def calculate_time_to_ball(self):
+    def calculate_time_to_ball(self) -> float:
         """
         Calculates the time to ball and saves it in the team data capsule.
         """
@@ -107,6 +107,8 @@ class PathfindingCapsule:
         else:
             # since we can not get a reasonable estimate, we are lost and set the time_to_ball to a very high value
             self._blackboard.team_data.own_time_to_ball = 9999.0
+
+        return self._blackboard.team_data.own_time_to_ball
 
     def time_from_pose_to_pose(self, own_pose: PoseStamped, goal_pose: PoseStamped) -> float:
         """
