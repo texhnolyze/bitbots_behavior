@@ -3,8 +3,8 @@ from unittest.mock import Mock
 import pytest
 from geometry_msgs.msg import Point, Pose, Quaternion
 
-from bitbots_blackboard.blackboard import BodyBlackboard, GameStatusCapsule, KickCapsule
-from bitbots_body_behavior.state.needs import AbleToMoveNeed, Needs
+from bitbots_blackboard.blackboard import BodyBlackboard, GameStatusCapsule, KickCapsule, WorldModelCapsule
+from bitbots_body_behavior.state.needs import AbleToMoveNeed, BallSeenNeed, Needs
 from bitbots_body_behavior.state.state import State
 
 
@@ -14,6 +14,7 @@ def blackboard() -> BodyBlackboard:
 
     blackboard.gamestate = Mock(GameStatusCapsule)
     blackboard.kick = Mock(KickCapsule)
+    blackboard.world_model = Mock(WorldModelCapsule)
 
     return blackboard
 
@@ -38,6 +39,7 @@ def state() -> State:
 def needs():
     needs = Mock(Needs)
     needs.ABLE_TO_MOVE = Mock(AbleToMoveNeed)
+    needs.BALL_SEEN = Mock(BallSeenNeed)
 
     return needs
 
