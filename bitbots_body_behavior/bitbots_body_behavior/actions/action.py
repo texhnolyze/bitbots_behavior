@@ -1,6 +1,6 @@
 from typing import Optional
-from bitbots_blackboard.blackboard import BodyBlackboard
 
+from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_body_behavior.state.needs import Needs
 from bitbots_body_behavior.state.state import State
 

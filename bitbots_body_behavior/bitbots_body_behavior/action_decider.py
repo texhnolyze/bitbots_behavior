@@ -5,7 +5,7 @@ from rclpy.impl.rcutils_logger import RcutilsLogger as Logger
 from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_body_behavior.evaluation import Evaluation, EvaluationResult, Evaluator
 
-from .actions import Action, DribbleAction, GoToBallAction, PositioningAction
+from .actions import Action, GoToBallAction
 from .state.needs import Needs
 from .state.state import State
 

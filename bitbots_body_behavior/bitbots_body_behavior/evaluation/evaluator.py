@@ -1,4 +1,4 @@
-from typing import Iterable, Tuple, Optional
+from typing import Iterable, Optional, Tuple
 
 from bitbots_body_behavior.actions import Action
 from bitbots_body_behavior.state.state import State

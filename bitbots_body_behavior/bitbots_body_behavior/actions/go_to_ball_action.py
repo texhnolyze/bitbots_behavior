@@ -1,19 +1,12 @@
-from bitbots_blackboard.capsules.pathfinding_capsule import BallGoalType
-from bitbots_blackboard.blackboard import BodyBlackboard
-from bitbots_body_behavior.functions.combinators import AndCombinator, NaturalLogarithm, OrCombinator, Prioritization
-from bitbots_body_behavior.functions.utility_functions import (
-    EulerExponentialUF,
-    ExponentialUF,
-    LinearUF,
-    NormVerteilungUF,
-    PiecewiseUF,
-)
-from bitbots_body_behavior.state.needs import Need, Needs
-from bitbots_body_behavior.state.state import State
-from std_msgs.msg import ColorRGBA
-from visualization_msgs.msg import Marker
 from geometry_msgs.msg import Vector3
 from rclpy.duration import Duration
+from std_msgs.msg import ColorRGBA
+from visualization_msgs.msg import Marker
+
+from bitbots_blackboard.blackboard import BodyBlackboard
+from bitbots_blackboard.capsules.pathfinding_capsule import BallGoalType
+from bitbots_body_behavior.state.needs import Need, Needs
+from bitbots_body_behavior.state.state import State
 
 from .action import Action
 
@@ -48,9 +41,9 @@ class GoToBallAction(Action):
 
     def next_states_to_evaluate(self, state: State) -> list[State]:
         return []
-    
+
     def execute(self, blackboard: BodyBlackboard, _):
-        pose_msg = blackboard.pathfinding.get_ball_goal(BallGoalType.MAP , 0)
+        pose_msg = blackboard.pathfinding.get_ball_goal(BallGoalType.MAP, 0)
         blackboard.pathfinding.publish(pose_msg)
 
         approach_marker = Marker()
@@ -71,6 +64,3 @@ class GoToBallAction(Action):
         approach_marker.header.frame_id = blackboard.world_model.base_footprint_frame
 
         blackboard.pathfinding.approach_marker_pub.publish(approach_marker)
-
-    
-

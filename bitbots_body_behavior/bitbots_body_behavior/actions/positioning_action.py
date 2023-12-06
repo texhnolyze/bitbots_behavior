@@ -1,5 +1,3 @@
-import math
-
 from bitbots_body_behavior.state.needs import Need, Needs
 from bitbots_body_behavior.state.state import State
 
