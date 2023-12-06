@@ -17,6 +17,7 @@ class MiscCapsule:
     def __init__(self, node: Node):
         self.node = node
         self.head_pub = node.create_publisher(HeadMode, "head_mode", 10)
+        self.head_mode: HeadMode = HeadMode()
 
         # Config
         gamestate_settings = get_parameters_from_other_node(
@@ -35,10 +36,11 @@ class MiscCapsule:
     # ## Tracking Part ##
     #####################
 
-    def set_head_duty(self, head_duty: int):
-        head_duty_msg = HeadMode()
-        head_duty_msg.head_mode = head_duty
-        self.head_pub.publish(head_duty_msg)
+    def set_head_mode(self, head_mode: int):
+        head_mode_msg = HeadMode()
+        head_mode_msg.head_mode = head_mode
+        self.head_pub.publish(head_mode_msg)
+        self.head_mode = head_mode_msg
 
     ###################
     # ## Robot state ##
@@ -49,6 +51,9 @@ class MiscCapsule:
 
     def is_currently_walking(self) -> bool:
         return self.robot_control_state is not None and self.robot_control_state.state == RobotControlState.WALKING
+
+    def get_head_mode(self) -> int:
+        return self.head_mode.head_mode
 
     #############
     # ## Timer ##

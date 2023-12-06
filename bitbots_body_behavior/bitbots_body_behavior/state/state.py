@@ -8,6 +8,7 @@ class State:
     def update(self) -> None:
         # own properties
         self.current_position = self.blackboard.world_model.get_current_position()
+        self.head_mode = self.blackboard.misc.get_head_mode()
 
         # ball properties
         self.distance_to_ball = self.blackboard.world_model.get_ball_distance()
