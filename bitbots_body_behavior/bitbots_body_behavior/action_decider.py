@@ -5,7 +5,7 @@ from rclpy.impl.rcutils_logger import RcutilsLogger as Logger
 from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_body_behavior.evaluation import Evaluation, EvaluationResult, Evaluator
 
-from .actions import Action, GoToBallAction
+from .actions import Action, GoToBallAction, StandAction
 from .state.needs import Needs
 from .state.state import State
 
@@ -33,6 +33,7 @@ class ActionDecider:
 
     def setup_actions(self) -> list[Action]:
         return [
+            StandAction(self.needs),
             GoToBallAction(self.needs),
             # DribbleAction(self.needs),
             # PositioningAction(self.needs),
@@ -46,16 +47,16 @@ class ActionDecider:
         self.update_state()
 
         possible_actions = list(filter(self.are_actions_needs_fulfilled, self.actions))
-        if not len(possible_actions):
+        if len(possible_actions) == 0:
             self.best_result = None
+        else:
+            needed_evaluations = list(map(self.evaluation_from_action, possible_actions))
+            results = list(self.evaluator.evaluate_actions(needed_evaluations))
 
-        needed_evaluations = list(map(self.evaluation_from_action, possible_actions))
-        results = list(self.evaluator.evaluate_actions(needed_evaluations))
-
-        if len(results):
-            ideal_action = max(results, key=lambda item: item[2])
-            self.best_result = ideal_action
-            self.logger.info(f"Ideal action: {ideal_action[0]}, max_score: {ideal_action[2]}, {ideal_action[1]})")
+            if len(results):
+                ideal_action = max(results, key=lambda item: item[2])
+                self.best_result = ideal_action
+                self.logger.info(f"Ideal action: {ideal_action[0]}, max_score: {ideal_action[2]}, {ideal_action[1]})")
 
     def execute_ideal_action(self):
         if self.best_result:

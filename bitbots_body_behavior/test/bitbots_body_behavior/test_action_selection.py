@@ -5,7 +5,7 @@ from bitbots_msgs.msg import GameState
 from rclpy.impl.rcutils_logger import RcutilsLogger as Logger
 
 from bitbots_body_behavior.action_decider import ActionDecider
-from bitbots_body_behavior.actions.go_to_ball_action import GoToBallAction
+from bitbots_body_behavior.actions import GoToBallAction, StandAction
 from bitbots_body_behavior.evaluation import SyncEvaluator
 from bitbots_body_behavior.state.needs import Needs
 
@@ -16,7 +16,7 @@ def test_no_needs_fulfilled(decider, blackboard):
     decider.decide()
 
     assert decider.fulfilled_needs == []
-    assert decider.best_result is None
+    assert isinstance(decider.best_result[0], StandAction)
 
 
 def test_only_able_to_move_need_fulfilled(decider, blackboard):
@@ -26,7 +26,7 @@ def test_only_able_to_move_need_fulfilled(decider, blackboard):
     decider.decide()
 
     assert decider.fulfilled_needs == [decider.needs.ABLE_TO_MOVE]
-    assert decider.best_result is None
+    assert isinstance(decider.best_result[0], StandAction)
 
 
 def test_only_ball_seen_need_fulfilled(decider, blackboard):
@@ -36,7 +36,7 @@ def test_only_ball_seen_need_fulfilled(decider, blackboard):
     decider.decide()
 
     assert decider.fulfilled_needs == [decider.needs.BALL_SEEN]
-    assert decider.best_result is None
+    assert isinstance(decider.best_result[0], StandAction)
 
 
 def test_able_to_move_and_ball_seen_need_fulfilled(decider, blackboard):
