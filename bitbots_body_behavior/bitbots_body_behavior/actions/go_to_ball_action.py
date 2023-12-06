@@ -15,13 +15,14 @@ from bitbots_body_behavior.functions.combinators import (
 )
 from bitbots_body_behavior.functions.utility_functions import (
     EulerExponentialUF,
-    ExponentialUF,
+    SigmoidUF,
     LinearUF,
     NormVerteilungUF,
     PiecewiseUF,
 )
 from bitbots_body_behavior.state.needs import Need, Needs
 from bitbots_body_behavior.state.state import State
+from bitbots_body_behavior.actions.offensive_mapping import OffensiveMapping
 
 from .action import Action
 
@@ -33,8 +34,8 @@ class GoToBallAction(Action):
     def evaluate(self, state: State) -> float:
         # Block1 der Rolle und allgemeinen Ballposition
         # offensive_mapping = PiecewiseUF.setup(LinearUF.setup(0, 0), 0.5, 0.5)
-        offensive_mapping = 0.5
-        ball_position_x = ExponentialUF.setup(1, 1, 1).apply(state.ball_position_xy[0])
+        offensive_mapping = OffensiveMapping.apply(state.role)
+        ball_position_x = SigmoidUF.setup(4).apply(state.ball_position_xy[0])
         pressing = NaturalLogarithm.apply([offensive_mapping, ball_position_x], 5)
 
         # Block2 Winkel und Distanz

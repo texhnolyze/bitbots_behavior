@@ -69,15 +69,16 @@ class EulerExponentialUF(UtilityFunction):
 
 class SigmoidUF(UtilityFunction):
     @staticmethod
-    def setup(position_x_axis: float = 1.0):
-        return SigmoidUF(position_x_axis)
+    def setup(nenner_factor: float = 1.0, zaehler_factor: float = 1.0):
+        return SigmoidUF(nenner_factor, zaehler_factor)
 
-    def __init__(self, position_x_axis: float = 0):
+    def __init__(self, nenner_factor: float = 0.0, zaehler_factor: float = 0.0):
         self.e = math.e
-        self.position_x_axis = position_x_axis
+        self.nenner_factor = nenner_factor
+        self.zaehler_factor = zaehler_factor
 
     def apply(self, x):
-        return 1 / (1 + (self.e) ** -(x + self.position_x_axis))
+        return self.zaehler_factor / (1 + (self.e) ** -(x / self.nenner_factor))
 
 
 class NormVerteilungUF(UtilityFunction):
