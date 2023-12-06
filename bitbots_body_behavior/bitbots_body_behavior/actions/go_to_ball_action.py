@@ -7,6 +7,7 @@ from visualization_msgs.msg import Marker
 
 from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_blackboard.capsules.pathfinding_capsule import BallGoalType
+from bitbots_body_behavior.considerations.offensive_mapping import OffensiveMapping
 from bitbots_body_behavior.functions.combinators import (
     AndCombinator,
     NaturalLogarithm,
@@ -15,14 +16,13 @@ from bitbots_body_behavior.functions.combinators import (
 )
 from bitbots_body_behavior.functions.utility_functions import (
     EulerExponentialUF,
-    SigmoidUF,
     LinearUF,
     NormVerteilungUF,
     PiecewiseUF,
+    SigmoidUF,
 )
 from bitbots_body_behavior.state.needs import Need, Needs
 from bitbots_body_behavior.state.state import State
-from bitbots_body_behavior.actions.offensive_mapping import OffensiveMapping
 
 from .action import Action
 

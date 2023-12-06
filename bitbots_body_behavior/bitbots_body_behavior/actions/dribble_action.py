@@ -1,4 +1,5 @@
-from bitbots_body_behavior.functions.combinators import(
+from bitbots_body_behavior.considerations.offensive_mapping import OffensiveMapping
+from bitbots_body_behavior.functions.combinators import (
     Prioritization,
 )
 from bitbots_body_behavior.functions.utility_functions import (
@@ -7,7 +8,6 @@ from bitbots_body_behavior.functions.utility_functions import (
 )
 from bitbots_body_behavior.state.needs import Need, Needs
 from bitbots_body_behavior.state.state import State
-from bitbots_body_behavior.actions.offensive_mapping import OffensiveMapping
 
 from .action import Action
 
@@ -17,7 +17,7 @@ class DribbleAction(Action):
         self.needs: list[Need] = [needs.ABLE_TO_MOVE]
 
     def evaluate(self, state: State) -> float:
-        #Offensive Mapping
+        # Offensive Mapping
         offensive_mapping = OffensiveMapping.apply(state.role)
 
         # Block 1: Spielsituation
@@ -25,7 +25,7 @@ class DribbleAction(Action):
         seconds_remaining = PiecewiseUF.setup(LinearUF.setup(-1, 30, 1), 30, 0).apply(state.seconds_remaining)
 
         game_pressure = Prioritization.apply([goal_difference, seconds_remaining], [9, 1])
-        
+
         combinator_off_press = Prioritization.apply([offensive_mapping, game_pressure], [4, 6])
 
         return combinator_off_press

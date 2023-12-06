@@ -1,4 +1,5 @@
 from copy import copy
+from typing import Tuple
 
 from bitbots_blackboard.blackboard import BodyBlackboard
 
@@ -48,4 +49,9 @@ class State:
     def set_head_mode(self, head_mode: int) -> "State":
         instance = copy(self)
         instance.head_mode = head_mode
+        return instance
+
+    def set_current_position(self, current_position: Tuple[float, float, float]) -> "State":
+        instance = copy(self)
+        instance.current_position = current_position
         return instance
