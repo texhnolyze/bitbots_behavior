@@ -28,13 +28,13 @@ class Inverter(Combinator):
 class Prioritization(Combinator):
     @staticmethod
     def apply(inputs: list[float], weights: list[float]) -> float:
-        result = 0
-        weights_summed = 0
+        result = 0.0
+        weights_summed = 0.0
         for weight in weights:
             weights_summed += weight
 
-        if weights_summed == 0:
-            return 0
+        if weights_summed == 0.0:
+            return 0.0
         else:
             for i in range(len(weights)):
                 weights[i] /= weights_summed
@@ -55,7 +55,8 @@ class NaturalLogarithm(Combinator):
 
     @staticmethod
     def apply(inputs: list[float], constant: float = 1.0) -> float:
-        input_sub = 0
+        input_sub = 0.0
+
         for input in inputs:
             input_sub -= input
 
