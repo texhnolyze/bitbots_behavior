@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
+from bitbots_msgs.msg import HeadMode
 from geometry_msgs.msg import Point, Pose, Quaternion
 
 from bitbots_blackboard.blackboard import BodyBlackboard, GameStatusCapsule, KickCapsule, MiscCapsule, WorldModelCapsule
@@ -21,9 +22,10 @@ def blackboard() -> BodyBlackboard:
 
 
 @pytest.fixture
-def state() -> State:
+def state(new_state) -> State:
     state: State = Mock(State)
     state.update.return_value = state
+    state.set_head_mode.return_value = new_state
 
     state.goal_difference = 0
     state.seconds_remaining = 120.0
@@ -32,6 +34,14 @@ def state() -> State:
     state.ball_position_xy = [3.4, 5.6]
     state.angle_to_ball = 5.6
     state.time_to_ball = 7.8
+
+    return state
+
+
+@pytest.fixture
+def new_state() -> State:
+    state: State = Mock(State)
+    state.head_mode = HeadMode.DONT_MOVE
 
     return state
 

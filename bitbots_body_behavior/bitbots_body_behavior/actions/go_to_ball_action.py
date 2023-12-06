@@ -53,9 +53,6 @@ class GoToBallAction(Action):
 
         return OrCombinator.apply([combinator_b1_b2, game_pressure])
 
-    def next_states_to_evaluate(self, state: State) -> list[State]:
-        return []
-
     def execute(self, blackboard: BodyBlackboard, _: Optional[State]):
         pose_distance_from_ball = blackboard.config.get("ball_approach_dist", 0.0)
         pose_msg = blackboard.pathfinding.get_ball_goal(BallGoalType.MAP, pose_distance_from_ball)

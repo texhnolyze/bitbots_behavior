@@ -1,3 +1,5 @@
+from copy import copy
+
 from bitbots_blackboard.blackboard import BodyBlackboard
 
 
@@ -37,3 +39,13 @@ class State:
         # Potentially interesting for future states
         # self.get_ball_goal = blackboard.pathfinding.get_ball_goal(BallGoalType.MAP)
         # self.time_from_pose_to_pose = blackboard.pathfinding.time_from_pose_to_pose()
+
+    def copy(self) -> "State":
+        instance = copy(self)
+        del instance.blackboard
+        return instance
+
+    def set_head_mode(self, head_mode: int) -> "State":
+        instance = copy(self)
+        instance.head_mode = head_mode
+        return instance
