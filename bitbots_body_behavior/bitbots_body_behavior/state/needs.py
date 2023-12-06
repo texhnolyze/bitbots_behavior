@@ -25,13 +25,22 @@ class AbleToMoveNeed(Need):
         )
 
 
+class BallSeenNeed(Need):
+    def __init__(self, blackboard: BodyBlackboard) -> None:
+        self.blackboard: BodyBlackboard = blackboard
+
+    def available(self) -> bool:
+        return self.blackboard.world_model.ball_has_been_seen()
+
+
 class Needs:
     def __init__(self, blackboard: BodyBlackboard) -> None:
         self.blackboard: BodyBlackboard = blackboard
         self.ABLE_TO_MOVE = AbleToMoveNeed(blackboard)
+        self.BALL_SEEN = BallSeenNeed(blackboard)
 
     def all(self):
-        return [self.ABLE_TO_MOVE]
+        return [self.ABLE_TO_MOVE, self.BALL_SEEN]
 
     def available(self) -> list[Need]:
         return list(filter(lambda need: need.available(), self.all()))
