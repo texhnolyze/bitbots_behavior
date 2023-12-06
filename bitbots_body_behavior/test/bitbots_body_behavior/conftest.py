@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
-from bitbots_msgs.msg import HeadMode
+from bitbots_msgs.msg import HeadMode, Strategy
 from geometry_msgs.msg import Point, Pose, Quaternion
 
 from bitbots_blackboard.blackboard import BodyBlackboard, GameStatusCapsule, KickCapsule, MiscCapsule, WorldModelCapsule
@@ -27,6 +27,7 @@ def state(new_state) -> State:
     state.update.return_value = state
     state.set_head_mode.return_value = new_state
 
+    state.role = [Strategy.ROLE_SUPPORTER, 10000000]
     state.goal_difference = 0
     state.seconds_remaining = 120.0
     state.current_position = [1.0, 1.0, 0.2]

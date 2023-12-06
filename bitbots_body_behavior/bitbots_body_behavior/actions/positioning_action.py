@@ -1,5 +1,7 @@
 import math
+from typing import Tuple
 
+import numpy as np
 from bitbots_utils.transforms import quat_from_yaw
 from geometry_msgs.msg import PoseStamped
 
@@ -22,6 +24,8 @@ from bitbots_body_behavior.state.needs import Need, Needs
 from bitbots_body_behavior.state.state import State
 
 from .action import Action
+
+Point = Tuple[float, float, float]
 
 
 class PositioningAction(Action):
@@ -68,25 +72,66 @@ class PositioningAction(Action):
         return OrCombinator.apply(allg_positioning, pressing)
 
     def next_states_to_evaluate(self, state: State) -> list[State]:
-        current_state = state.current_position
-        teammate_states = state.active_teammate_poses
-        future_positions = list(
-            [current_state[0] + 0.5, current_state[1], current_state[2]],
-            [current_state[0], current_state[1] + 0.5, current_state[2]],
-            [current_state[0] + math.sqrt(0.5), current_state[1] + math.sqrt(0.5), current_state[2]],
-            [current_state[0] - 0.5, current_state[1], current_state[2]],
-            [current_state[0], current_state[1] - 0.5, current_state[2]],
-            [current_state[0] - math.sqrt(0.5), current_state[1] - math.sqrt(0.5), current_state[2]],
-            [current_state[0] + math.sqrt(0.5), current_state[1] - math.sqrt(0.5), current_state[2]],
-            [current_state[0] - math.sqrt(0.5), current_state[1] + math.sqrt(0.5), current_state[2]],
-        )
+        # generate the next possible positions in a circle around the current position
+        # with an offset of 0.5m in each direction 0°, 45°, 90°, 135°, 180°, 225°, 270°, 315°
+        walk_distance = 0.5
+        potential_future_positions = self.generate_potential_positions(state.current_position, walk_distance)
+        next_positions = np.empty((0, 3))
 
-        for position in future_positions:
-            for state in teammate_states:
-                if position == state:
-                    future_positions.remove(position)
+        for own_position in potential_future_positions:
+            in_walking_distance = False
 
-        return list(map(state.set_current_position, future_positions))
+            for teammate_position in state.active_teammate_poses:
+                distance_to_teammate = np.linalg.norm(np.array(own_position) - np.array(teammate_position))
+
+                if distance_to_teammate < walk_distance:
+                    in_walking_distance = True
+                    break
+
+            if not in_walking_distance:
+                next_positions = np.vstack((next_positions, own_position))
+
+        return list(map(state.set_current_position, next_positions))
+
+    def generate_potential_positions(self, current_position: Point, distance: float = 1.0) -> list[Point]:
+        points = [current_position]
+        x, y, theta = current_position
+
+        # setup up the angles for the 8 points around the current position based on the unit circle
+        angles = [0, math.pi / 4, math.pi / 2, 3 * math.pi / 4, math.pi, -3 * math.pi / 4, -math.pi / 2, -math.pi / 4]
+
+        for angle in angles:
+            new_x = x + distance * math.cos(theta + angle)
+            new_y = y + distance * math.sin(theta + angle)
+
+            points.append((new_x, new_y, theta))
+
+        return points
+
+    # def generate_potential_positions(self, current_position: Point, distance: float = 0.5) -> list[Point]:
+    #     points = [current_position]
+    #     x, y, theta = current_position
+
+    #     offsets = [
+    #         (distance, 0),  # Right
+    #         (distance * math.sqrt(0.5), -distance * math.sqrt(0.5)),  # Back-Right
+    #         (0, -distance),  # Back
+    #         (-distance * math.sqrt(0.5), -distance * math.sqrt(0.5)),  # Back-Left
+    #         (-distance, 0),  # Left
+    #         (-distance * math.sqrt(0.5), distance * math.sqrt(0.5)),  # Front-Left
+    #         (0, distance),  # Front
+    #         (distance * math.sqrt(0.5), distance * math.sqrt(0.5)),  # Front-Right
+    #     ]
+
+    #     for offset_x, offset_y in offsets:
+    #         new_x = x + offset_x
+    #         new_y = y + offset_y
+    #         # new_x = x + offset_x * math.cos(theta) - offset_y * math.sin(theta)
+    #         # new_y = y + offset_x * math.sin(theta) + offset_y * math.cos(theta)
+
+    #         points.append((new_x, new_y, theta))
+
+    #     return points
 
     def execute(self, blackboard: BodyBlackboard, new_state: State):
         pose_msg = PoseStamped()
