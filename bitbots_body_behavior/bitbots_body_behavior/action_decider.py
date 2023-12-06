@@ -46,6 +46,9 @@ class ActionDecider:
         self.update_state()
 
         possible_actions = list(filter(self.are_actions_needs_fulfilled, self.actions))
+        if not len(possible_actions):
+            self.best_result = None
+
         needed_evaluations = list(map(self.evaluation_from_action, possible_actions))
         results = list(self.evaluator.evaluate_actions(needed_evaluations))
 

@@ -56,7 +56,7 @@ class GoToBallAction(Action):
         return []
 
     def execute(self, blackboard: BodyBlackboard, _: Optional[State]):
-        pose_distance_from_ball = 0.0
+        pose_distance_from_ball = blackboard.config.get("ball_approach_dist", 0.0)
         pose_msg = blackboard.pathfinding.get_ball_goal(BallGoalType.MAP, pose_distance_from_ball)
         blackboard.pathfinding.publish(pose_msg)
 
