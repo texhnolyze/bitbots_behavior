@@ -15,17 +15,18 @@ class ActionDecider:
         self,
         blackboard: BodyBlackboard,
         state: State,
+        needs: Needs,
         evaluator: Evaluator,
         logger: Logger,
     ):
         self.blackboard = blackboard
         self.state = state
+        self.needs = needs
         self.evaluator = evaluator
 
-        self.needs = Needs(self.blackboard)
         self.fulfilled_needs = []
         self.actions: list[Action] = self.setup_actions()
-        self.next_action: Optional[EvaluationResult] = None
+        self.best_result: Optional[EvaluationResult] = None
 
         self.logger = logger
         self.max_parallel_states = 4
@@ -50,21 +51,19 @@ class ActionDecider:
 
         if len(results):
             ideal_action = max(results, key=lambda item: item[2])
-            self.next_action = ideal_action
-
+            self.best_result = ideal_action
             self.logger.info(f"Ideal action: {ideal_action[0]}, max_score: {ideal_action[2]}, {ideal_action[1]})")
 
     def execute_ideal_action(self):
-        if self.next_action:
-            self.logger.info(f"Executing ideal action: {self.next_action[0]}")
-            self.next_action[0].execute(self.blackboard, self.next_action[2])
+        if self.best_result:
+            action, new_state, utility_value = self.best_result
+            self.logger.info(f"Executing ideal action: {action}")
+            action.execute(self.blackboard, new_state)
 
     def evaluation_from_action(self, action: Action) -> Evaluation:
-        print(f"evaluation from action: {action}")
         next_states = action.next_states_to_evaluate(self.state)
 
         return (action, self.state, next_states)
 
     def are_actions_needs_fulfilled(self, action: Action) -> bool:
-        print(f"filter: {all(need in self.fulfilled_needs for need in action.needs)}")
         return all(need in self.fulfilled_needs for need in action.needs)

@@ -13,6 +13,7 @@ from soccer_vision_3d_msgs.msg import RobotArray
 
 from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_body_behavior.evaluation import SyncEvaluator
+from bitbots_body_behavior.state.needs import Needs
 from bitbots_body_behavior.state.state import State
 
 from .action_decider import ActionDecider
@@ -34,7 +35,8 @@ class BodyBehavior:
 
     def setup_action_decider(self):
         state = State(self.blackboard)
-        self.decider = ActionDecider(self.blackboard, state, SyncEvaluator(), self.node.get_logger())
+        needs = Needs(self.blackboard)
+        self.decider = ActionDecider(self.blackboard, state, needs, SyncEvaluator(), self.node.get_logger())
 
     # def setup_dsd(self):
     #     self.dsd = DSD(

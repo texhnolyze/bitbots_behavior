@@ -16,7 +16,7 @@ class Action:
         raise NotImplementedError
 
     def next_states_to_evaluate(self, state: State) -> list[State]:
-        raise NotImplementedError
+        return []
 
     def __repr__(self):
         return self.__class__.__name__
