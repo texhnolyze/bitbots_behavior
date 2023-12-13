@@ -4,8 +4,15 @@ import pytest
 from bitbots_msgs.msg import HeadMode, Strategy
 from geometry_msgs.msg import Point, Pose, Quaternion
 
-from bitbots_blackboard.blackboard import BodyBlackboard, GameStatusCapsule, KickCapsule, MiscCapsule, WorldModelCapsule, TeamDataCapsule
-from bitbots_body_behavior.state.needs import AbleToMoveNeed, ClosestToBallNeed, BallSeenNeed, Needs
+from bitbots_blackboard.blackboard import (
+    BodyBlackboard,
+    GameStatusCapsule,
+    KickCapsule,
+    MiscCapsule,
+    TeamDataCapsule,
+    WorldModelCapsule,
+)
+from bitbots_body_behavior.state.needs import AbleToMoveNeed, BallSeenNeed, ClosestToBallNeed, Needs
 from bitbots_body_behavior.state.state import State
 
 
@@ -36,6 +43,7 @@ def state(new_state) -> State:
     state.ball_position_xy = [3.4, 5.6]
     state.angle_to_ball = 5.6
     state.time_to_ball = 7.8
+    state.map_based_opp_goal_center_xy = [7.8, 9.0]
 
     return state
 
@@ -44,6 +52,7 @@ def state(new_state) -> State:
 def new_state() -> State:
     state: State = Mock(State)
     state.head_mode = HeadMode.DONT_MOVE
+    state.current_position = [0.0, 0.0, 0.0]
 
     return state
 

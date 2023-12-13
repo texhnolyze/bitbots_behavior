@@ -2,7 +2,6 @@ import math
 from typing import Tuple
 
 import numpy as np
-from bitbots_utils.transforms import quat_from_yaw
 from geometry_msgs.msg import PoseStamped
 
 from bitbots_blackboard.blackboard import BodyBlackboard
@@ -15,9 +14,6 @@ from bitbots_body_behavior.functions.combinators import (
     Prioritization,
 )
 from bitbots_body_behavior.functions.utility_functions import (
-    ExponentialUF,
-    LinearUF,
-    PiecewiseUF,
     SigmoidUF_two_x,
 )
 from bitbots_body_behavior.state.needs import Need, Needs
@@ -40,7 +36,7 @@ class PositioningAction(Action):
         opp_goal_x_diff = SigmoidUF_two_x.setup(1, 1.65, -1, 0.7).apply(
             state.map_based_opp_goal_center_xy[0] - new_state.current_position[0]
         )
-        if (opp_goal_x_diff > 1):
+        if opp_goal_x_diff > 1:
             opp_goal_x_diff = 1
         # Fehlerhaft, Sigmoid muss be 2. Variante kriegen
         opp_goal_y_diff = SigmoidUF_two_x.setup(-0.5, 2).apply(
@@ -51,8 +47,10 @@ class PositioningAction(Action):
         combinator_offmap_off = NaturalLogarithm.apply([offense_positioning, offensive_mapping], 5)
 
         # Block 2: Defensive Positionierung vorm Ball (vielleicht auch zwischen Ball und own_goal möglich?)
-        ball_x_diff = SigmoidUF_two_x.setup(1, 1.65, -1, 0.7).apply(state.ball_position_xy[0] - new_state.current_position[0])
-        if (ball_x_diff > 1):
+        ball_x_diff = SigmoidUF_two_x.setup(1, 1.65, -1, 0.7).apply(
+            state.ball_position_xy[0] - new_state.current_position[0]
+        )
+        if ball_x_diff > 1:
             ball_x_diff = 1
         ball_y_diff = SigmoidUF_two_x.setup(-0.5, 2).apply(state.ball_position_xy[1] - new_state.current_position[1])
         defense_positioning = AndCombinator.apply([ball_x_diff, ball_y_diff])
@@ -124,6 +122,6 @@ class PositioningAction(Action):
         pose_msg.pose.position.x = new_state.current_position[0]
         pose_msg.pose.position.y = new_state.current_position[1]
         pose_msg.pose.position.z = 0
-        #pose_msg.pose.orientation = quat_from_yaw(math.radians(self.point[2]))
+        # pose_msg.pose.orientation = quat_from_yaw(math.radians(self.point[2]))
 
         blackboard.pathfinding.publish(pose_msg)

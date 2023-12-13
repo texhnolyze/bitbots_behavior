@@ -1,6 +1,14 @@
 from bitbots_body_behavior.actions import PositioningAction
 
 
+def test_evalutate(state, new_state, needs):
+    action = PositioningAction(needs)
+    utility = action.evaluate(state, new_state)
+
+    assert isinstance(utility, float)
+    assert utility >= 0.0
+
+
 def test_next_states_to_evaluate_no_teammates_in_walking_distance(snapshot, needs, state):
     state.current_position = (0, 0, 0)
     state.active_teammate_poses = [(1, 1, 0), (-1, -1, 0)]
