@@ -54,7 +54,7 @@ class DribbleAction(Action):
         current_speed_x = max_accel_x *max_speed_x + current_speed_x * (1 -max_accel_x)
 
         # give more speed in y direction based on ball position
-        y_speed = ball_v * p
+        y_speed = ball_v[1] * p
 
         current_speed_y = max_accel_y * np.clip(
             y_speed, -max_speed_y,max_speed_y

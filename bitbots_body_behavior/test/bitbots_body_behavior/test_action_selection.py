@@ -60,6 +60,17 @@ def test_able_to_move_closest_to_ball_and_ball_seen_need_fulfilled(decider, blac
     assert decider.fulfilled_needs == [decider.needs.ABLE_TO_MOVE, decider.needs.BALL_SEEN, decider.needs.CLOSEST_TO_BALL]
     assert isinstance(decider.best_result[0], GoToBallAction)
 
+def test_able_to_move_has_ball_and_ball_seen_need_fulfilled(decider, blackboard):
+    no_needs_fulfilled(blackboard)
+    blackboard.gamestate.get_gamestate.return_value = GameState.GAMESTATE_PLAYING
+    blackboard.world_model.ball_has_been_seen.return_value = True
+    blackboard.world_model.get_ball_distance.return_value = 0.1
+
+    decider.decide()
+
+    assert decider.fulfilled_needs == [decider.needs.ABLE_TO_MOVE, decider.needs.BALL_SEEN]
+    assert isinstance(decider.best_result[0], StandAction)
+
 
 def no_needs_fulfilled(blackboard):
     # AbleToMoveNeed
