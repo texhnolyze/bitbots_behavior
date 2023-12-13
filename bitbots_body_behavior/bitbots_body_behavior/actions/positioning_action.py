@@ -86,9 +86,8 @@ class PositioningAction(Action):
         for angle in angles:
             new_x = x + distance * math.cos(theta + angle)
             new_y = y + distance * math.sin(theta + angle)
-            new_theta = theta + angle
 
-            points.append((new_x, new_y, new_theta))
+            points.append((new_x, new_y, theta))
 
         return points
 

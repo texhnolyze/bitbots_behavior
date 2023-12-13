@@ -1,6 +1,10 @@
 from copy import copy
 from typing import Tuple
 
+from geometry_msgs.msg import Pose
+from ros2_numpy import numpify
+from tf_transformations import euler_from_quaternion
+
 from bitbots_blackboard.blackboard import BodyBlackboard
 
 
@@ -34,12 +38,18 @@ class State:
         self.red_cards = self.blackboard.gamestate.get_red_cards()
 
         # additional properties
-        self.active_teammate_poses = self.blackboard.team_data.get_active_teammate_poses()
         self.rank_to_ball = self.blackboard.team_data.team_rank_to_ball(self.distance_to_ball)
+        self.active_teammate_poses = list(
+            map(self.convert_to_euler, self.blackboard.team_data.get_active_teammate_poses())
+        )
 
         # Potentially interesting for future states
         # self.get_ball_goal = blackboard.pathfinding.get_ball_goal(BallGoalType.MAP)
         # self.time_from_pose_to_pose = blackboard.pathfinding.time_from_pose_to_pose()
+
+    def convert_to_euler(self, pose: Pose) -> Tuple[float, float, float]:
+        theta = euler_from_quaternion(numpify(pose.orientation))[2]
+        return (pose.position.x, pose.position.y, theta)
 
     def copy(self) -> "State":
         instance = copy(self)

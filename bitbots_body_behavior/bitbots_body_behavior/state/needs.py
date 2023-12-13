@@ -8,6 +8,21 @@ class Need:
         raise NotImplementedError
 
 
+class Needs:
+    def __init__(self, blackboard: BodyBlackboard) -> None:
+        self.blackboard: BodyBlackboard = blackboard
+        self.ABLE_TO_MOVE = AbleToMoveNeed(blackboard)
+        self.BALL_SEEN = BallSeenNeed(blackboard)
+        self.CLOSEST_TO_BALL = ClosestToBallNeed(blackboard)
+        self.HAS_BALL = HasBallNeed(blackboard)
+
+    def all(self):
+        return [self.ABLE_TO_MOVE, self.BALL_SEEN, self.CLOSEST_TO_BALL, self.HAS_BALL]
+
+    def available(self) -> list[Need]:
+        return list(filter(lambda need: need.available(), self.all()))
+
+
 class AbleToMoveNeed(Need):
     def __init__(self, blackboard: BodyBlackboard) -> None:
         self.blackboard: BodyBlackboard = blackboard
@@ -33,21 +48,6 @@ class BallSeenNeed(Need):
         return self.blackboard.world_model.ball_has_been_seen()
 
 
-class Needs:
-    def __init__(self, blackboard: BodyBlackboard) -> None:
-        self.blackboard: BodyBlackboard = blackboard
-        self.ABLE_TO_MOVE = AbleToMoveNeed(blackboard)
-        self.BALL_SEEN = BallSeenNeed(blackboard)
-        self.CLOSEST_TO_BALL = ClosestToBallNeed(blackboard)
-        self.HAS_BALL = HasBallNeed(blackboard)
-
-    def all(self):
-        return [self.ABLE_TO_MOVE, self.BALL_SEEN, self.CLOSEST_TO_BALL, self.HAS_BALL]
-
-    def available(self) -> list[Need]:
-        return list(filter(lambda need: need.available(), self.all()))
-
-
 class ClosestToBallNeed(Need):
     def __init__(self, blackboard: BodyBlackboard) -> None:
         self.blackboard: BodyBlackboard = blackboard
@@ -62,4 +62,4 @@ class HasBallNeed(Need):
         self.blackboard: BodyBlackboard = blackboard
 
     def available(self) -> bool:
-        return self.blackboard.world_model.get_ball_distance() <= self.blackboard.config.get("ball_approach_dist", 0.0)
+        return self.blackboard.world_model.get_ball_distance() <= self.blackboard.config.get("ball_approach_dist")
