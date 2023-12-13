@@ -1,12 +1,18 @@
 from unittest.mock import Mock
 
 import pytest
-
 from bitbots_msgs.msg import HeadMode, Strategy
 from geometry_msgs.msg import Point, Pose, Quaternion
 
-from bitbots_blackboard.blackboard import BodyBlackboard, GameStatusCapsule, KickCapsule, MiscCapsule, WorldModelCapsule, TeamDataCapsule
-from bitbots_body_behavior.state.needs import AbleToMoveNeed, ClosestToBallNeed, HasBallNeed, BallSeenNeed, Needs
+from bitbots_blackboard.blackboard import (
+    BodyBlackboard,
+    GameStatusCapsule,
+    KickCapsule,
+    MiscCapsule,
+    TeamDataCapsule,
+    WorldModelCapsule,
+)
+from bitbots_body_behavior.state.needs import AbleToMoveNeed, BallSeenNeed, ClosestToBallNeed, HasBallNeed, Needs
 from bitbots_body_behavior.state.state import State
 
 

@@ -46,22 +46,20 @@ class Needs:
 
     def available(self) -> list[Need]:
         return list(filter(lambda need: need.available(), self.all()))
-    
+
+
 class ClosestToBallNeed(Need):
     def __init__(self, blackboard: BodyBlackboard) -> None:
         self.blackboard: BodyBlackboard = blackboard
         self.distance_to_ball = self.blackboard.world_model.get_ball_distance()
 
     def available(self) -> bool:
-        
         return self.blackboard.team_data.team_rank_to_ball(self.distance_to_ball) == 1
-    
+
+
 class HasBallNeed(Need):
     def __init__(self, blackboard: BodyBlackboard) -> None:
         self.blackboard: BodyBlackboard = blackboard
 
     def available(self) -> bool:
         return self.blackboard.world_model.get_ball_distance() <= self.blackboard.config.get("ball_approach_dist", 0.0)
-        
-
-

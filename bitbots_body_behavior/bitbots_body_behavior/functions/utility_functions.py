@@ -79,14 +79,22 @@ class SigmoidUF(UtilityFunction):
 
     def apply(self, x):
         return self.zaehler_wert / (1 + (self.e) ** -(x / self.nenner_factor))
-        
 
-class SigmoidUF_two_x(UtilityFunction):
+
+class SigmoidTwoXUF(UtilityFunction):
     @staticmethod
-    def setup(nenner_factor: float = 1.0, zaehler_wert: float = 1.0, zaehler_factor: float = 1.0, x_verschiebung: float = 0.0):
-        return SigmoidUF_two_x(nenner_factor, zaehler_wert, zaehler_factor, x_verschiebung)
+    def setup(
+        nenner_factor: float = 1.0, zaehler_wert: float = 1.0, zaehler_factor: float = 1.0, x_verschiebung: float = 0.0
+    ):
+        return SigmoidTwoXUF(nenner_factor, zaehler_wert, zaehler_factor, x_verschiebung)
 
-    def __init__(self, nenner_factor: float = 0.0, zaehler_wert: float = 0.0, zaehler_factor: float = 0.0, x_verschiebung: float = 0.0):
+    def __init__(
+        self,
+        nenner_factor: float = 0.0,
+        zaehler_wert: float = 0.0,
+        zaehler_factor: float = 0.0,
+        x_verschiebung: float = 0.0,
+    ):
         self.e = math.e
         self.nenner_factor = nenner_factor
         self.zaehler_wert = zaehler_wert
@@ -94,7 +102,10 @@ class SigmoidUF_two_x(UtilityFunction):
         self.x_verschiebung = x_verschiebung
 
     def apply(self, x):
-        return self.zaehler_wert * (self.e ** ((x + self.x_verschiebung) / self.zaehler_factor) / (1 + (self.e) ** -((x + self.x_verschiebung) / self.nenner_factor)))
+        return self.zaehler_wert * (
+            self.e ** ((x + self.x_verschiebung) / self.zaehler_factor)
+            / (1 + (self.e) ** -((x + self.x_verschiebung) / self.nenner_factor))
+        )
 
 
 class NormVerteilungUF(UtilityFunction):
