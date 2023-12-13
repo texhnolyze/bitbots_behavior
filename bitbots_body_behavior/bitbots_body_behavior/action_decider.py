@@ -5,7 +5,7 @@ from rclpy.impl.rcutils_logger import RcutilsLogger as Logger
 from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_body_behavior.evaluation import Evaluation, EvaluationResult, Evaluator
 
-from .actions import Action, GoToBallAction, StandAction, DribbleAction
+from .actions import Action, DribbleAction, GoToBallAction, StandAction
 from .state.needs import Needs
 from .state.state import State
 
@@ -56,12 +56,13 @@ class ActionDecider:
             if len(results):
                 ideal_action = max(results, key=lambda item: item[2])
                 self.best_result = ideal_action
-                self.logger.info(f"Ideal action: {ideal_action[0]}, max_score: {ideal_action[2]}, {ideal_action[1]})")
+                self.logger.info(
+                    f"Best action: {ideal_action[0]}, utility: {ideal_action[2]}, new_state: {ideal_action[1]})"
+                )
 
     def execute_ideal_action(self):
         if self.best_result:
             action, new_state, utility_value = self.best_result
-            self.logger.info(f"Executing ideal action: {action}")
             action.execute(self.blackboard, new_state)
 
     def evaluation_from_action(self, action: Action) -> Evaluation:

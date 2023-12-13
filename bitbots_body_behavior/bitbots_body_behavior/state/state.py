@@ -9,7 +9,7 @@ class State:
         self.blackboard = blackboard
 
     def update(self) -> None:
-        # own properties
+        # own properties (which are changed by actions)
         self.current_position = self.blackboard.world_model.get_current_position()
         self.head_mode = self.blackboard.misc.get_head_mode()
 
@@ -55,3 +55,8 @@ class State:
         instance = copy(self)
         instance.current_position = current_position
         return instance
+
+    def __repr__(self) -> str:
+        changeable_properties = ["head_mode", "current_position"]
+        poperties_string = ", ".join(f"{prop}={getattr(self, prop)}" for prop in changeable_properties)
+        return f"State({poperties_string})"
