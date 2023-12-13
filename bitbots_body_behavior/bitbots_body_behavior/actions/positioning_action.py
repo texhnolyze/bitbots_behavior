@@ -18,7 +18,7 @@ from bitbots_body_behavior.functions.utility_functions import (
     ExponentialUF,
     LinearUF,
     PiecewiseUF,
-    SigmoidUF,
+    SigmoidUF_two_x,
 )
 from bitbots_body_behavior.state.needs import Need, Needs
 from bitbots_body_behavior.state.state import State
@@ -37,11 +37,13 @@ class PositioningAction(Action):
         offensive_mapping = OffensiveMapping.apply(state.role)
 
         # Block 1: Offensive Positionierung vorm Tor
-        opp_goal_x_diff = ExponentialUF.setup(1, 1, 1).apply(
+        opp_goal_x_diff = SigmoidUF_two_x.setup(1, 1.65, -1, 0.7).apply(
             state.map_based_opp_goal_center_xy[0] - new_state.current_position[0]
         )
+        if (opp_goal_x_diff > 1):
+            opp_goal_x_diff = 1
         # Fehlerhaft, Sigmoid muss be 2. Variante kriegen
-        opp_goal_y_diff = SigmoidUF.setup(-0.5, 2 * math.e).apply(
+        opp_goal_y_diff = SigmoidUF_two_x.setup(-0.5, 2).apply(
             state.map_based_opp_goal_center_xy[1] - new_state.current_position[1]
         )
         offense_positioning = Prioritization.apply([opp_goal_x_diff, opp_goal_y_diff], [3, 7])
@@ -49,27 +51,15 @@ class PositioningAction(Action):
         combinator_offmap_off = NaturalLogarithm.apply([offense_positioning, offensive_mapping], 5)
 
         # Block 2: Defensive Positionierung vorm Ball (vielleicht auch zwischen Ball und own_goal möglich?)
-        ball_x_diff = ExponentialUF.setup(1, 1, 1).apply(state.ball_position_xy[0] - new_state.current_position[0])
-        ball_y_diff = ExponentialUF.setup(1, 1, 1).apply(state.ball_position_xy[1] - new_state.current_position[1])
+        ball_x_diff = SigmoidUF_two_x.setup(1, 1.65, -1, 0.7).apply(state.ball_position_xy[0] - new_state.current_position[0])
+        if (ball_x_diff > 1):
+            ball_x_diff = 1
+        ball_y_diff = SigmoidUF_two_x.setup(-0.5, 2).apply(state.ball_position_xy[1] - new_state.current_position[1])
         defense_positioning = AndCombinator.apply([ball_x_diff, ball_y_diff])
 
         combinator_offmap_def = NaturalLogarithm.apply([offensive_mapping, Inverter.apply(defense_positioning)], 5)
 
-        allg_positioning = OrCombinator.apply([combinator_offmap_off, combinator_offmap_def])
-
-        # Spielsituation
-        new_x_position = ExponentialUF.setup(1, 1, 1).apply(new_state.current_position[0])
-
-        # Block 3: Spielsituation
-        goal_difference = PiecewiseUF.setup(LinearUF.setup(-1, 8, 0.5), 4, -4).apply(state.goal_difference)
-        seconds_remaining = PiecewiseUF.setup(LinearUF.setup(-1, 30, 1), 30, 0).apply(state.seconds_remaining)
-
-        game_pressure = Prioritization.apply([goal_difference, seconds_remaining], [9, 1])
-
-        pressing = NaturalLogarithm.apply([new_x_position, game_pressure], 5)
-
-        # Angle und Distance zur new_position berechnen und einbinden?
-        return OrCombinator.apply(allg_positioning, pressing)
+        return OrCombinator.apply([combinator_offmap_off, combinator_offmap_def])
 
     def next_states_to_evaluate(self, state: State) -> list[State]:
         # generate the next possible positions in a circle around the current position
@@ -134,6 +124,6 @@ class PositioningAction(Action):
         pose_msg.pose.position.x = new_state.current_position[0]
         pose_msg.pose.position.y = new_state.current_position[1]
         pose_msg.pose.position.z = 0
-        pose_msg.pose.orientation = quat_from_yaw(math.radians(self.point[2]))
+        #pose_msg.pose.orientation = quat_from_yaw(math.radians(self.point[2]))
 
         blackboard.pathfinding.publish(pose_msg)
