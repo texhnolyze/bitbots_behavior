@@ -38,9 +38,20 @@ class Needs:
         self.blackboard: BodyBlackboard = blackboard
         self.ABLE_TO_MOVE = AbleToMoveNeed(blackboard)
         self.BALL_SEEN = BallSeenNeed(blackboard)
+        self.CLOSEST_TO_BALL = ClosestToBallNeed(blackboard)
 
     def all(self):
-        return [self.ABLE_TO_MOVE, self.BALL_SEEN]
+        return [self.ABLE_TO_MOVE, self.BALL_SEEN, self.CLOSEST_TO_BALL]
 
     def available(self) -> list[Need]:
         return list(filter(lambda need: need.available(), self.all()))
+    
+class ClosestToBallNeed(Need):
+    def __init__(self, blackboard: BodyBlackboard) -> None:
+        self.blackboard: BodyBlackboard = blackboard
+        self.distance_to_ball = self.blackboard.world_model.get_ball_distance()
+
+    def available(self) -> bool:
+        
+        return self.blackboard.team_data.team_rank_to_ball(self.distance_to_ball) == 1
+

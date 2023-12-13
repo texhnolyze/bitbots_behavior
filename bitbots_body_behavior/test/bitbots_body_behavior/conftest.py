@@ -4,8 +4,8 @@ import pytest
 from bitbots_msgs.msg import HeadMode, Strategy
 from geometry_msgs.msg import Point, Pose, Quaternion
 
-from bitbots_blackboard.blackboard import BodyBlackboard, GameStatusCapsule, KickCapsule, MiscCapsule, WorldModelCapsule
-from bitbots_body_behavior.state.needs import AbleToMoveNeed, BallSeenNeed, Needs
+from bitbots_blackboard.blackboard import BodyBlackboard, GameStatusCapsule, KickCapsule, MiscCapsule, WorldModelCapsule, TeamDataCapsule
+from bitbots_body_behavior.state.needs import AbleToMoveNeed, ClosestToBallNeed, BallSeenNeed, Needs
 from bitbots_body_behavior.state.state import State
 
 
@@ -17,6 +17,7 @@ def blackboard() -> BodyBlackboard:
     blackboard.kick = Mock(KickCapsule)
     blackboard.world_model = Mock(WorldModelCapsule)
     blackboard.misc = Mock(MiscCapsule)
+    blackboard.team_data = Mock(TeamDataCapsule)
 
     return blackboard
 
@@ -52,6 +53,7 @@ def needs():
     needs = Mock(Needs)
     needs.ABLE_TO_MOVE = Mock(AbleToMoveNeed)
     needs.BALL_SEEN = Mock(BallSeenNeed)
+    needs.CLOSEST_TO_BALL = Mock(ClosestToBallNeed)
 
     return needs
 

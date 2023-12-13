@@ -29,7 +29,7 @@ from .action import Action
 
 class GoToBallAction(Action):
     def __init__(self, needs: Needs):
-        self.needs: list[Need] = [needs.ABLE_TO_MOVE, needs.BALL_SEEN]
+        self.needs: list[Need] = [needs.ABLE_TO_MOVE, needs.BALL_SEEN, needs.CLOSEST_TO_BALL]
 
     def evaluate(self, state: State) -> float:
         # Block1 der Rolle und allgemeinen Ballposition
