@@ -64,12 +64,16 @@ class PositioningAction(Action):
         potential_future_positions = np.array(self.generate_potential_positions(state.current_position, walk_distance))
         teammate_positions = np.array(state.active_teammate_poses)
 
-        distances_to_teammates = np.linalg.norm(
-            potential_future_positions - teammate_positions[:, np.newaxis, :], axis=2
-        )
-        distance_to_next_teammate = np.min(distances_to_teammates, axis=0)
+        if len(teammate_positions) > 0:
+            distances_to_teammates = np.linalg.norm(
+                potential_future_positions - teammate_positions[:, np.newaxis, :], axis=2
+            )
+            distance_to_next_teammate = np.min(distances_to_teammates, axis=0)
 
-        next_positions = potential_future_positions[distance_to_next_teammate > walk_distance]
+            next_positions = potential_future_positions[distance_to_next_teammate > walk_distance]
+        else:
+            next_positions = potential_future_positions
+
         return list(map(state.set_current_position, next_positions))
 
     def generate_potential_positions(self, current_position: Point, distance: float = 1.0) -> list[Point]:
@@ -82,35 +86,11 @@ class PositioningAction(Action):
         for angle in angles:
             new_x = x + distance * math.cos(theta + angle)
             new_y = y + distance * math.sin(theta + angle)
+            new_theta = theta + angle
 
-            points.append((new_x, new_y, theta))
+            points.append((new_x, new_y, new_theta))
 
         return points
-
-    # def generate_potential_positions(self, current_position: Point, distance: float = 0.5) -> list[Point]:
-    #     points = [current_position]
-    #     x, y, theta = current_position
-
-    #     offsets = [
-    #         (distance, 0),  # Right
-    #         (distance * math.sqrt(0.5), -distance * math.sqrt(0.5)),  # Back-Right
-    #         (0, -distance),  # Back
-    #         (-distance * math.sqrt(0.5), -distance * math.sqrt(0.5)),  # Back-Left
-    #         (-distance, 0),  # Left
-    #         (-distance * math.sqrt(0.5), distance * math.sqrt(0.5)),  # Front-Left
-    #         (0, distance),  # Front
-    #         (distance * math.sqrt(0.5), distance * math.sqrt(0.5)),  # Front-Right
-    #     ]
-
-    #     for offset_x, offset_y in offsets:
-    #         new_x = x + offset_x
-    #         new_y = y + offset_y
-    #         # new_x = x + offset_x * math.cos(theta) - offset_y * math.sin(theta)
-    #         # new_y = y + offset_x * math.sin(theta) + offset_y * math.cos(theta)
-
-    #         points.append((new_x, new_y, theta))
-
-    #     return points
 
     def execute(self, blackboard: BodyBlackboard, new_state: State):
         pose_msg = PoseStamped()
@@ -119,7 +99,7 @@ class PositioningAction(Action):
 
         pose_msg.pose.position.x = new_state.current_position[0]
         pose_msg.pose.position.y = new_state.current_position[1]
-        pose_msg.pose.position.z = 0
+        pose_msg.pose.position.z = 0.0
         # pose_msg.pose.orientation = quat_from_yaw(math.radians(self.point[2]))
 
         blackboard.pathfinding.publish(pose_msg)
