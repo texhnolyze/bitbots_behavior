@@ -7,19 +7,12 @@ from visualization_msgs.msg import Marker
 
 from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_blackboard.capsules.pathfinding_capsule import BallGoalType
-from bitbots_body_behavior.considerations.offensive_mapping import OffensiveMapping
+from bitbots_body_behavior.considerations.ball_closeness import BallCloseness
+from bitbots_body_behavior.considerations.game_pressure import GamePressure
+from bitbots_body_behavior.considerations.pressing import Pressing
 from bitbots_body_behavior.functions.combinators import (
-    AndCombinator,
-    ExponentialDifference,
     OrCombinator,
     Prioritization,
-)
-from bitbots_body_behavior.functions.utility_functions import (
-    EulerExponentialUF,
-    LinearUF,
-    NormVerteilungUF,
-    PiecewiseUF,
-    SigmoidUF,
 )
 from bitbots_body_behavior.state.needs import Need, Needs
 from bitbots_body_behavior.state.state import State
@@ -32,26 +25,13 @@ class GoToBallAction(Action):
         self.needs: list[Need] = [needs.ABLE_TO_MOVE, needs.BALL_SEEN, needs.CLOSEST_TO_BALL]
 
     def evaluate(self, state: State) -> float:
-        # Block1 der Rolle und allgemeinen Ballposition
-        # offensive_mapping = PiecewiseUF.setup(LinearUF.setup(0, 0), 0.5, 0.5)
-        offensive_mapping = OffensiveMapping.apply(state.role)
-        ball_position_x = SigmoidUF.setup(4).apply(state.ball_position_xy[0])
-        pressing = ExponentialDifference.apply([offensive_mapping, ball_position_x], 5)
+        pressing = Pressing.get_utility_value(state)
+        ball_closeness = BallCloseness.get_utility_value(state)
+        ball_consideration = Prioritization.apply([pressing, ball_closeness], [2, 8])
 
-        # Block2 Winkel und Distanz
-        ball_angle = NormVerteilungUF.setup(0.25).apply(state.angle_to_ball)
-        ball_distance = EulerExponentialUF.setup(1, -1, 1).apply(state.distance_to_ball)
-        ball_closeness = AndCombinator.apply([ball_angle, ball_distance])
+        game_pressure = GamePressure.get_utility_value(state)
 
-        combinator_b1_b2 = Prioritization.apply([pressing, ball_closeness], [2, 8])
-
-        # Block3 Spielsituation
-        goal_difference = PiecewiseUF.setup(LinearUF.setup(-1, 8, 0.5), 4, -4).apply(state.goal_difference)
-        seconds_remaining = PiecewiseUF.setup(LinearUF.setup(-1, 30, 1), 30, 0).apply(state.seconds_remaining)
-
-        game_pressure = Prioritization.apply([goal_difference, seconds_remaining], [9, 1])
-
-        return OrCombinator.apply([combinator_b1_b2, game_pressure])
+        return OrCombinator.apply([ball_consideration, game_pressure])
 
     def execute(self, blackboard: BodyBlackboard, _: Optional[State]):
         pose_distance_from_ball = blackboard.config.get("ball_approach_dist", 0.0)
