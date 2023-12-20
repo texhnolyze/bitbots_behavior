@@ -28,16 +28,16 @@ class PositioningAction(Action):
 
     def evaluate(self, state: State, new_state: State) -> float:
         # Offensive Mapping
-        offensive_mapping = OffensiveMapping.apply(state.role)
+        offensive_mapping = OffensiveMapping.get_utility_value(state.role)
 
         # Block 1: Offensive Positionierung vorm Tor
-        opp_goal_x_diff = SigmoidTwoXUF.setup(1, 1.65, -1, 0.7).apply(
+        opp_goal_x_diff = SigmoidTwoXUF.setup(15, 1.75, 1, 1, -1).apply(
             state.map_based_opp_goal_center_xy[0] - new_state.current_position[0]
         )
         if opp_goal_x_diff > 1:
             opp_goal_x_diff = 1
         # Fehlerhaft, Sigmoid muss be 2. Variante kriegen
-        opp_goal_y_diff = SigmoidTwoXUF.setup(-0.5, 2).apply(
+        opp_goal_y_diff = SigmoidTwoXUF.setup(2, 2).apply(
             state.map_based_opp_goal_center_xy[1] - new_state.current_position[1]
         )
         offense_positioning = Prioritization.apply([opp_goal_x_diff, opp_goal_y_diff], [3, 7])
@@ -45,13 +45,22 @@ class PositioningAction(Action):
         combinator_offmap_off = ExponentialDifference.apply([offense_positioning, offensive_mapping], 5)
 
         # Block 2: Defensive Positionierung vorm Ball (vielleicht auch zwischen Ball und own_goal möglich?)
-        ball_x_diff = SigmoidTwoXUF.setup(1, 1.65, -1, 0.7).apply(
-            state.ball_position_xy[0] - new_state.current_position[0]
+        #ball_x_diff = SigmoidTwoXUF.setup(15, 1.75, 1, 1, -1).apply(
+            #state.ball_position_xy[0] - new_state.current_position[0]
+        #)
+        #if ball_x_diff > 1:
+            #ball_x_diff = 1
+        #ball_y_diff = SigmoidTwoXUF.setup(2, 2).apply(state.ball_position_xy[1] - new_state.current_position[1])
+        #defense_positioning = AndCombinator.apply([ball_x_diff, ball_y_diff])
+
+        own_goal_x_diff = SigmoidTwoXUF.setup(15, 1.75, 1, 1, -1).apply(
+            new_state.current_position[0] - state.map_based_own_goal_center_xy[0]
         )
-        if ball_x_diff > 1:
-            ball_x_diff = 1
-        ball_y_diff = SigmoidTwoXUF.setup(-0.5, 2).apply(state.ball_position_xy[1] - new_state.current_position[1])
-        defense_positioning = AndCombinator.apply([ball_x_diff, ball_y_diff])
+        if own_goal_x_diff > 1:
+            own_goal_x_diff = 1
+        own_goal_y_diff = SigmoidTwoXUF.setup(2, 2).apply(new_state.current_position[1] - state.map_based_own_goal_center_xy[1])
+        defense_positioning = AndCombinator.apply([own_goal_x_diff, own_goal_y_diff])
+
 
         combinator_offmap_def = ExponentialDifference.apply([offensive_mapping, Inverter.apply(defense_positioning)], 5)
 

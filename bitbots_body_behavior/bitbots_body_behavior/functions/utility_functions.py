@@ -84,9 +84,9 @@ class SigmoidUF(UtilityFunction):
 class SigmoidTwoXUF(UtilityFunction):
     @staticmethod
     def setup(
-        nenner_factor: float = 1.0, zaehler_wert: float = 1.0, zaehler_factor: float = 1.0, x_verschiebung: float = 0.0
+        nenner_factor: float = 1.0, zaehler_wert: float = 1.0, zaehler_factor: float = 1.0, x_verschiebung: float = 0.0, y_spiegelung: float = 1.0
     ):
-        return SigmoidTwoXUF(nenner_factor, zaehler_wert, zaehler_factor, x_verschiebung)
+        return SigmoidTwoXUF(nenner_factor, zaehler_wert, zaehler_factor, x_verschiebung, y_spiegelung)
 
     def __init__(
         self,
@@ -94,17 +94,19 @@ class SigmoidTwoXUF(UtilityFunction):
         zaehler_wert: float = 0.0,
         zaehler_factor: float = 0.0,
         x_verschiebung: float = 0.0,
+        y_spiegelung: float = 0.0
     ):
         self.e = math.e
         self.nenner_factor = nenner_factor
         self.zaehler_wert = zaehler_wert
         self.zaehler_factor = zaehler_factor
         self.x_verschiebung = x_verschiebung
+        self.y_spiegelung = y_spiegelung
 
     def apply(self, x):
         return self.zaehler_wert * (
-            self.e ** ((x + self.x_verschiebung) / self.zaehler_factor)
-            / (1 + (self.e) ** -((x + self.x_verschiebung) / self.nenner_factor))
+            self.e ** ((self.y_spiegelung *x + self.x_verschiebung) * self.zaehler_factor)
+            / (1 + (self.e) ** ((self.y_spiegelung *x + self.x_verschiebung) * self.nenner_factor))
         )
 
 
