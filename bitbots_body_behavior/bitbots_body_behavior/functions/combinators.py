@@ -45,19 +45,8 @@ class Prioritization(Combinator):
             return result
 
 
-class NaturalLogarithm(Combinator):
-    @staticmethod
-    def abs(number):
-        if number >= 0:
-            return number
-        else:
-            return -number
-
+class ExponentialDifference(Combinator):
     @staticmethod
     def apply(inputs: list[float], constant: float = 1.0) -> float:
-        input_sub = 0.0
-
-        for input in inputs:
-            input_sub -= input
-
-        return math.exp(-abs(constant * (input_sub)))
+        inputs_difference = inputs[0] - inputs[1]
+        return math.exp(-abs(constant * inputs_difference))

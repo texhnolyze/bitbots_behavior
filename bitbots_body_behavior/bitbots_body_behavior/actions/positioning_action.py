@@ -8,8 +8,8 @@ from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_body_behavior.considerations.offensive_mapping import OffensiveMapping
 from bitbots_body_behavior.functions.combinators import (
     AndCombinator,
+    ExponentialDifference,
     Inverter,
-    NaturalLogarithm,
     OrCombinator,
     Prioritization,
 )
@@ -42,7 +42,7 @@ class PositioningAction(Action):
         )
         offense_positioning = Prioritization.apply([opp_goal_x_diff, opp_goal_y_diff], [3, 7])
 
-        combinator_offmap_off = NaturalLogarithm.apply([offense_positioning, offensive_mapping], 5)
+        combinator_offmap_off = ExponentialDifference.apply([offense_positioning, offensive_mapping], 5)
 
         # Block 2: Defensive Positionierung vorm Ball (vielleicht auch zwischen Ball und own_goal möglich?)
         ball_x_diff = SigmoidTwoXUF.setup(1, 1.65, -1, 0.7).apply(
@@ -53,7 +53,7 @@ class PositioningAction(Action):
         ball_y_diff = SigmoidTwoXUF.setup(-0.5, 2).apply(state.ball_position_xy[1] - new_state.current_position[1])
         defense_positioning = AndCombinator.apply([ball_x_diff, ball_y_diff])
 
-        combinator_offmap_def = NaturalLogarithm.apply([offensive_mapping, Inverter.apply(defense_positioning)], 5)
+        combinator_offmap_def = ExponentialDifference.apply([offensive_mapping, Inverter.apply(defense_positioning)], 5)
 
         return OrCombinator.apply([combinator_offmap_off, combinator_offmap_def])
 

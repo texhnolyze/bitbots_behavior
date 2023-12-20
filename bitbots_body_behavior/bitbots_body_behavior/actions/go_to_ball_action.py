@@ -10,7 +10,7 @@ from bitbots_blackboard.capsules.pathfinding_capsule import BallGoalType
 from bitbots_body_behavior.considerations.offensive_mapping import OffensiveMapping
 from bitbots_body_behavior.functions.combinators import (
     AndCombinator,
-    NaturalLogarithm,
+    ExponentialDifference,
     OrCombinator,
     Prioritization,
 )
@@ -36,7 +36,7 @@ class GoToBallAction(Action):
         # offensive_mapping = PiecewiseUF.setup(LinearUF.setup(0, 0), 0.5, 0.5)
         offensive_mapping = OffensiveMapping.apply(state.role)
         ball_position_x = SigmoidUF.setup(4).apply(state.ball_position_xy[0])
-        pressing = NaturalLogarithm.apply([offensive_mapping, ball_position_x], 5)
+        pressing = ExponentialDifference.apply([offensive_mapping, ball_position_x], 5)
 
         # Block2 Winkel und Distanz
         ball_angle = NormVerteilungUF.setup(0.25).apply(state.angle_to_ball)
