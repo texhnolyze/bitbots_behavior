@@ -1,11 +1,12 @@
 <launch>
     <arg name="tf_prefix" default=""/>
     <arg name="sim" default="false" />
+    <arg name="log-level" default="INFO" />
 
     <let if="$(env IS_ROBOT false)" name="taskset" value="taskset -c 2"/>
     <let unless="$(env IS_ROBOT false)" name="taskset" value=""/>
 
-    <node pkg="bitbots_body_behavior" exec="body_behavior" output="screen" launch-prefix="$(var taskset)">
+    <node pkg="bitbots_body_behavior" exec="body_behavior" output="screen" launch-prefix="$(var taskset)" args="--ros-args --log-level $(var log-level)">
         <param name="actionlib_client_sub_queue_size" value="-1"/>
         <param name="actionlib_client_sub_queue_size" value="-1"/>
         <param name="actionlib_server_sub_queue_size" value="-1"/>
