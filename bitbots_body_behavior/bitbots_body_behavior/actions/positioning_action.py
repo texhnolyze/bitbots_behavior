@@ -2,6 +2,7 @@ import math
 from typing import Tuple
 
 import numpy as np
+from bitbots_utils.transforms import quat_from_yaw
 from geometry_msgs.msg import PoseStamped
 
 from bitbots_blackboard.blackboard import BodyBlackboard
@@ -36,13 +37,15 @@ class PositioningAction(Action):
         )
         if opp_goal_x_diff > 1:
             opp_goal_x_diff = 1
-        # Fehlerhaft, Sigmoid muss be 2. Variante kriegen
-        opp_goal_y_diff = SigmoidTwoXUF.setup(2, 2).apply(
-            state.map_based_opp_goal_center_xy[1] - new_state.current_position[1]
-        )
-        offense_positioning = Prioritization.apply([opp_goal_x_diff, opp_goal_y_diff], [3, 7])
 
-        combinator_offmap_off = ExponentialDifference.apply([offense_positioning, offensive_mapping], 5)
+        opp_goal_y_diff = SigmoidTwoXUF.setup(2, 2).apply(new_state.current_position[1])
+
+        offense_positioning = AndCombinator.apply([opp_goal_x_diff, opp_goal_y_diff])
+
+        combinator_offmap_off = 0
+        if (offensive_mapping == 0.8):
+            #combinator_offmap_off = ExponentialDifference.apply([offense_positioning, offensive_mapping], 5)
+            combinator_offmap_off = offense_positioning
 
         # Block 2: Defensive Positionierung vorm Ball (vielleicht auch zwischen Ball und own_goal möglich?)
         #ball_x_diff = SigmoidTwoXUF.setup(15, 1.75, 1, 1, -1).apply(
@@ -58,11 +61,15 @@ class PositioningAction(Action):
         )
         if own_goal_x_diff > 1:
             own_goal_x_diff = 1
-        own_goal_y_diff = SigmoidTwoXUF.setup(2, 2).apply(new_state.current_position[1] - state.map_based_own_goal_center_xy[1])
+
+        own_goal_y_diff = SigmoidTwoXUF.setup(2, 2).apply(new_state.current_position[1])
+
         defense_positioning = AndCombinator.apply([own_goal_x_diff, own_goal_y_diff])
 
-
-        combinator_offmap_def = ExponentialDifference.apply([offensive_mapping, Inverter.apply(defense_positioning)], 5)
+        combinator_offmap_def = 0
+        if (offensive_mapping == 0.3):
+            #combinator_offmap_def = ExponentialDifference.apply([offensive_mapping, Inverter.apply(defense_positioning)], 5)
+            combinator_offmap_def = defense_positioning
 
         return OrCombinator.apply([combinator_offmap_off, combinator_offmap_def])
 
@@ -95,8 +102,9 @@ class PositioningAction(Action):
         for angle in angles:
             new_x = x + distance * math.cos(theta + angle)
             new_y = y + distance * math.sin(theta + angle)
+            new_theta = theta + angle
 
-            points.append((new_x, new_y, theta))
+            points.append((new_x, new_y, new_theta))
 
         return points
 
@@ -108,6 +116,5 @@ class PositioningAction(Action):
         pose_msg.pose.position.x = new_state.current_position[0]
         pose_msg.pose.position.y = new_state.current_position[1]
         pose_msg.pose.position.z = 0.0
-        # pose_msg.pose.orientation = quat_from_yaw(math.radians(self.point[2]))
-
+        pose_msg.pose.orientation = quat_from_yaw(math.radians(new_state.current_position[2]))
         blackboard.pathfinding.publish(pose_msg)
