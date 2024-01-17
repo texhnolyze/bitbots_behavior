@@ -47,6 +47,7 @@ def state(new_state) -> State:
     state.angle_to_ball = 5.6
     state.time_to_ball = 7.8
     state.active_teammate_poses = []
+    state.map_based_own_goal_center_xy = [-4.5, 0.0]
     state.map_based_opp_goal_center_xy = [4.5, 0.0]
 
     return state

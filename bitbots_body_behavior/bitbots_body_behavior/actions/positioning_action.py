@@ -7,12 +7,11 @@ from bitbots_utils.transforms import quat_from_yaw
 from geometry_msgs.msg import PoseStamped
 
 from bitbots_blackboard.blackboard import BodyBlackboard
-from bitbots_body_behavior.considerations.offensive_mapping import OffensiveMapping
+from bitbots_body_behavior.considerations.defensiveness import Defensiveness
+from bitbots_body_behavior.considerations.offensiveness import Offensiveness
 from bitbots_body_behavior.functions.combinators import (
-    AndCombinator,
     OrCombinator,
 )
-from bitbots_body_behavior.functions.utility_functions import SigmoidTwoXUF
 from bitbots_body_behavior.state.needs import Need, Needs
 from bitbots_body_behavior.state.state import State
 
@@ -25,51 +24,11 @@ class PositioningAction(Action):
     def __init__(self, needs: Needs):
         self.needs: list[Need] = [needs.ABLE_TO_MOVE]
 
-    def evaluate(self, state: State, new_state: State) -> float:
-        # Offensive Mapping
-        offensive_mapping = OffensiveMapping.get_utility_value(state.role)
+    def evaluate(self, _: State, new_state: State) -> float:
+        offensiveness = Offensiveness.get_utility_value(new_state)
+        defensiveness = Defensiveness.get_utility_value(new_state)
 
-        # Block 1: Offensive Positionierung vorm Tor
-        opp_goal_x_diff = SigmoidTwoXUF.setup(15, 1.75, 1, 1, -1).apply(
-            state.map_based_opp_goal_center_xy[0] - new_state.current_position[0]
-        )
-        if opp_goal_x_diff > 1:
-            opp_goal_x_diff = 1
-
-        opp_goal_y_diff = SigmoidTwoXUF.setup(2, 2).apply(new_state.current_position[1])
-
-        offense_positioning = AndCombinator.apply([opp_goal_x_diff, opp_goal_y_diff])
-
-        combinator_offmap_off = 0
-        if offensive_mapping == 0.8:
-            # combinator_offmap_off = ExponentialDifference.apply([offense_positioning, offensive_mapping], 5)
-            combinator_offmap_off = offense_positioning
-
-        # Block 2: Defensive Positionierung vorm Ball (vielleicht auch zwischen Ball und own_goal möglich?)
-        # ball_x_diff = SigmoidTwoXUF.setup(15, 1.75, 1, 1, -1).apply(
-        # state.ball_position_xy[0] - new_state.current_position[0]
-        # )
-        # if ball_x_diff > 1:
-        # ball_x_diff = 1
-        # ball_y_diff = SigmoidTwoXUF.setup(2, 2).apply(state.ball_position_xy[1] - new_state.current_position[1])
-        # defense_positioning = AndCombinator.apply([ball_x_diff, ball_y_diff])
-
-        own_goal_x_diff = SigmoidTwoXUF.setup(15, 1.75, 1, 1, -1).apply(
-            new_state.current_position[0] - state.map_based_own_goal_center_xy[0]
-        )
-        if own_goal_x_diff > 1:
-            own_goal_x_diff = 1
-
-        own_goal_y_diff = SigmoidTwoXUF.setup(2, 2).apply(new_state.current_position[1])
-
-        defense_positioning = AndCombinator.apply([own_goal_x_diff, own_goal_y_diff])
-
-        combinator_offmap_def = 0
-        if offensive_mapping == 0.3:
-            # combinator_offmap_def = ExponentialDifference.apply([offensive_mapping, Inverter.apply(defense_positioning)], 5)
-            combinator_offmap_def = defense_positioning
-
-        return OrCombinator.apply([combinator_offmap_off, combinator_offmap_def])
+        return OrCombinator.apply([offensiveness, defensiveness])
 
     def next_states_to_evaluate(self, state: State) -> list[State]:
         # generate the next possible positions in a circle around the current position
