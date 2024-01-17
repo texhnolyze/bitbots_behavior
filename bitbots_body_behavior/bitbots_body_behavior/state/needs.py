@@ -1,3 +1,5 @@
+import math
+
 from bitbots_msgs.msg import GameState
 
 from bitbots_blackboard.blackboard import BodyBlackboard
@@ -62,4 +64,5 @@ class HasBallNeed(Need):
         self.blackboard: BodyBlackboard = blackboard
 
     def available(self) -> bool:
-        return self.blackboard.world_model.get_ball_distance() <= self.blackboard.config.get("ball_approach_dist")
+        return self.blackboard.world_model.get_ball_distance() <= self.blackboard.config.get("ball_reapproach_dist") \
+            and self.blackboard.world_model.get_ball_angle() <= math.pi / 8

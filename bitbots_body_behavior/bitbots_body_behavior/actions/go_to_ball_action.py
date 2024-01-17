@@ -35,18 +35,19 @@ class GoToBallAction(Action):
         return OrCombinator.apply([ball_consideration, game_pressure])
 
     def execute(self, blackboard: BodyBlackboard, _: Optional[State]):
-        pose_distance_from_ball = blackboard.config.get("ball_approach_dist", 0.0)
+        approach_distance = blackboard.config.get("ball_approach_dist", 0.0)
+        reapproach_distance = blackboard.config.get("ball_reapproach_dist", 1.0)
 
-        if blackboard.world_model.get_ball_distance() > 1.5:
+        if blackboard.world_model.get_ball_distance() > reapproach_distance:
             blackboard.misc.set_head_mode(HeadMode.BALL_MODE)
         else:
             blackboard.misc.set_head_mode(HeadMode.LOOK_FRONT)
 
-        pose_msg = blackboard.pathfinding.get_ball_goal(BallGoalType.MAP, pose_distance_from_ball)
+        pose_msg = blackboard.pathfinding.get_ball_goal(BallGoalType.MAP, approach_distance)
         blackboard.pathfinding.publish(pose_msg)
 
         approach_marker = Marker()
-        approach_marker.pose.position.x = pose_distance_from_ball
+        approach_marker.pose.position.x = approach_distance
         approach_marker.type = Marker.SPHERE
         approach_marker.action = Marker.MODIFY
         approach_marker.id = 1
