@@ -31,7 +31,7 @@ class State:
         self.map_based_own_goal_center_xy = self.blackboard.world_model.get_map_based_own_goal_center_xy()
 
         # gamestate properties
-        self.role = self.blackboard.team_data.get_role()
+        self.role, _ = self.blackboard.team_data.get_role()
         self.own_goals = self.blackboard.gamestate.get_own_goals()
         self.goal_difference = self.blackboard.gamestate.get_goal_difference()
         self.seconds_remaining = self.blackboard.gamestate.get_seconds_remaining()

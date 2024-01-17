@@ -38,7 +38,7 @@ def state(new_state) -> State:
     state.set_head_mode.return_value = new_state
     state.set_current_position.return_value = new_state
 
-    state.role = [Strategy.ROLE_SUPPORTER, 10000000]
+    state.role = Strategy.ROLE_SUPPORTER
     state.goal_difference = 0
     state.seconds_remaining = 120.0
     state.current_position = (1.0, 1.0, 0.2)
