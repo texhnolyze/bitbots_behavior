@@ -29,6 +29,5 @@ def test_next_states_to_evaluate_teammates_in_walking_distance(snapshot, needs, 
     action = PositioningAction(needs)
     next_states = action.next_states_to_evaluate(state)
 
-    print(next_states)
     assert len(next_states) == 3
     assert next_states == snapshot

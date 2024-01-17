@@ -9,10 +9,7 @@ from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_body_behavior.considerations.offensive_mapping import OffensiveMapping
 from bitbots_body_behavior.functions.combinators import (
     AndCombinator,
-    ExponentialDifference,
-    Inverter,
     OrCombinator,
-    Prioritization,
 )
 from bitbots_body_behavior.functions.utility_functions import SigmoidTwoXUF
 from bitbots_body_behavior.state.needs import Need, Needs
@@ -81,10 +78,14 @@ class PositioningAction(Action):
         teammate_positions = np.array(state.active_teammate_poses)
 
         if len(teammate_positions) > 0:
+            # calculate the distance to each teammate resulting in a matrix
+            # where each column is a teammate and each row is a potential future position
             distances_to_teammates = np.linalg.norm(
-                potential_future_positions - teammate_positions[:, np.newaxis, :], axis=2
+                potential_future_positions[:, np.newaxis, :2] - teammate_positions[np.newaxis, :, :2], axis=2
             )
-            distance_to_next_teammate = np.min(distances_to_teammates, axis=0)
+            # by take the minimum of each row we get the distance to the closest teammate 
+            # for each potential future position
+            distance_to_next_teammate = np.min(distances_to_teammates, axis=1)
 
             next_positions = potential_future_positions[distance_to_next_teammate > walk_distance]
         else:
