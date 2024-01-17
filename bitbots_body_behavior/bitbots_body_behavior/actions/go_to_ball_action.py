@@ -1,5 +1,6 @@
 from typing import Optional
 
+from bitbots_msgs.msg import HeadMode
 from geometry_msgs.msg import Vector3
 from rclpy.duration import Duration
 from std_msgs.msg import ColorRGBA
@@ -35,6 +36,12 @@ class GoToBallAction(Action):
 
     def execute(self, blackboard: BodyBlackboard, _: Optional[State]):
         pose_distance_from_ball = blackboard.config.get("ball_approach_dist", 0.0)
+
+        if blackboard.world_model.get_ball_distance() > 1.5:
+            blackboard.misc.set_head_mode(HeadMode.BALL_MODE)
+        else:
+            blackboard.misc.set_head_mode(HeadMode.LOOK_FRONT)
+
         pose_msg = blackboard.pathfinding.get_ball_goal(BallGoalType.MAP, pose_distance_from_ball)
         blackboard.pathfinding.publish(pose_msg)
 

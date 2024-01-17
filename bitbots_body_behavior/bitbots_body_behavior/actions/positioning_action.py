@@ -2,6 +2,7 @@ import math
 from typing import Tuple
 
 import numpy as np
+from bitbots_msgs.msg import HeadMode
 from bitbots_utils.transforms import quat_from_yaw
 from geometry_msgs.msg import PoseStamped
 
@@ -40,18 +41,18 @@ class PositioningAction(Action):
         offense_positioning = AndCombinator.apply([opp_goal_x_diff, opp_goal_y_diff])
 
         combinator_offmap_off = 0
-        if (offensive_mapping == 0.8):
-            #combinator_offmap_off = ExponentialDifference.apply([offense_positioning, offensive_mapping], 5)
+        if offensive_mapping == 0.8:
+            # combinator_offmap_off = ExponentialDifference.apply([offense_positioning, offensive_mapping], 5)
             combinator_offmap_off = offense_positioning
 
         # Block 2: Defensive Positionierung vorm Ball (vielleicht auch zwischen Ball und own_goal möglich?)
-        #ball_x_diff = SigmoidTwoXUF.setup(15, 1.75, 1, 1, -1).apply(
-            #state.ball_position_xy[0] - new_state.current_position[0]
-        #)
-        #if ball_x_diff > 1:
-            #ball_x_diff = 1
-        #ball_y_diff = SigmoidTwoXUF.setup(2, 2).apply(state.ball_position_xy[1] - new_state.current_position[1])
-        #defense_positioning = AndCombinator.apply([ball_x_diff, ball_y_diff])
+        # ball_x_diff = SigmoidTwoXUF.setup(15, 1.75, 1, 1, -1).apply(
+        # state.ball_position_xy[0] - new_state.current_position[0]
+        # )
+        # if ball_x_diff > 1:
+        # ball_x_diff = 1
+        # ball_y_diff = SigmoidTwoXUF.setup(2, 2).apply(state.ball_position_xy[1] - new_state.current_position[1])
+        # defense_positioning = AndCombinator.apply([ball_x_diff, ball_y_diff])
 
         own_goal_x_diff = SigmoidTwoXUF.setup(15, 1.75, 1, 1, -1).apply(
             new_state.current_position[0] - state.map_based_own_goal_center_xy[0]
@@ -64,8 +65,8 @@ class PositioningAction(Action):
         defense_positioning = AndCombinator.apply([own_goal_x_diff, own_goal_y_diff])
 
         combinator_offmap_def = 0
-        if (offensive_mapping == 0.3):
-            #combinator_offmap_def = ExponentialDifference.apply([offensive_mapping, Inverter.apply(defense_positioning)], 5)
+        if offensive_mapping == 0.3:
+            # combinator_offmap_def = ExponentialDifference.apply([offensive_mapping, Inverter.apply(defense_positioning)], 5)
             combinator_offmap_def = defense_positioning
 
         return OrCombinator.apply([combinator_offmap_off, combinator_offmap_def])
@@ -83,7 +84,7 @@ class PositioningAction(Action):
             distances_to_teammates = np.linalg.norm(
                 potential_future_positions[:, np.newaxis, :2] - teammate_positions[np.newaxis, :, :2], axis=2
             )
-            # by take the minimum of each row we get the distance to the closest teammate 
+            # by take the minimum of each row we get the distance to the closest teammate
             # for each potential future position
             distance_to_next_teammate = np.min(distances_to_teammates, axis=1)
 
@@ -110,6 +111,8 @@ class PositioningAction(Action):
         return points
 
     def execute(self, blackboard: BodyBlackboard, new_state: State):
+        blackboard.misc.set_head_mode(HeadMode.BALL_MODE)
+
         pose_msg = PoseStamped()
         pose_msg.header.stamp = blackboard.node.get_clock().now().to_msg()
         pose_msg.header.frame_id = blackboard.map_frame

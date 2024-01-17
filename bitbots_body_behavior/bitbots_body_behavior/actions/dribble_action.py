@@ -1,4 +1,7 @@
+from typing import Optional
+
 import numpy as np
+from bitbots_msgs.msg import HeadMode
 from geometry_msgs.msg import Twist
 
 from bitbots_blackboard.blackboard import BodyBlackboard
@@ -15,16 +18,15 @@ class DribbleAction(Action):
     def evaluate(self, state: State) -> float:
         return 1.0
 
-    def next_states_to_evaluate(self, state: State) -> list[State]:
-        return []
-
-    def execute(self, blackboard: BodyBlackboard, new_state: State | None):
+    def execute(self, blackboard: BodyBlackboard, _: Optional[State]):
         max_speed_x = blackboard.config["dribble_max_speed_x"]
         max_speed_y = blackboard.config["dribble_max_speed_y"]
         ball_heading_x_vel_zero_point = blackboard.config["dribble_ball_heading_x_vel_zero_point"]
         p = blackboard.config["dribble_p"]
         max_accel_x = blackboard.config["dribble_accel_x"]
         max_accel_y = blackboard.config["dribble_accel_y"]
+
+        blackboard.misc.set_head_mode(HeadMode.LOOK_FRONT)
 
         current_speed_x = blackboard.pathfinding.current_cmd_vel.linear.x
         current_speed_y = blackboard.pathfinding.current_cmd_vel.linear.y
