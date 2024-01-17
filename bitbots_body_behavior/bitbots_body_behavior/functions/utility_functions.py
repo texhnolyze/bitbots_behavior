@@ -56,7 +56,7 @@ class ExponentialUF(UtilityFunction):
 class EulerExponentialUF(UtilityFunction):
     @staticmethod
     def setup(factor: float = 1.0, exponent_factor: float = 1.0, max_x: float = 1.0):
-        return ExponentialUF(factor, exponent_factor, max_x)
+        return EulerExponentialUF(factor, exponent_factor, max_x)
 
     def __init__(self, factor: float, exponent_factor: float, max_x: float):
         self.factor = factor
@@ -84,7 +84,11 @@ class SigmoidUF(UtilityFunction):
 class SigmoidTwoXUF(UtilityFunction):
     @staticmethod
     def setup(
-        nenner_factor: float = 1.0, zaehler_wert: float = 1.0, zaehler_factor: float = 1.0, x_verschiebung: float = 0.0, y_spiegelung: float = 1.0
+        nenner_factor: float = 1.0,
+        zaehler_wert: float = 1.0,
+        zaehler_factor: float = 1.0,
+        x_verschiebung: float = 0.0,
+        y_spiegelung: float = 1.0,
     ):
         return SigmoidTwoXUF(nenner_factor, zaehler_wert, zaehler_factor, x_verschiebung, y_spiegelung)
 
@@ -94,7 +98,7 @@ class SigmoidTwoXUF(UtilityFunction):
         zaehler_wert: float = 0.0,
         zaehler_factor: float = 0.0,
         x_verschiebung: float = 0.0,
-        y_spiegelung: float = 0.0
+        y_spiegelung: float = 0.0,
     ):
         self.e = math.e
         self.nenner_factor = nenner_factor
@@ -105,8 +109,8 @@ class SigmoidTwoXUF(UtilityFunction):
 
     def apply(self, x):
         return self.zaehler_wert * (
-            self.e ** ((self.y_spiegelung *x + self.x_verschiebung) * self.zaehler_factor)
-            / (1 + (self.e) ** ((self.y_spiegelung *x + self.x_verschiebung) * self.nenner_factor))
+            self.e ** ((self.y_spiegelung * x + self.x_verschiebung) * self.zaehler_factor)
+            / (1 + (self.e) ** ((self.y_spiegelung * x + self.x_verschiebung) * self.nenner_factor))
         )
 
 
@@ -120,7 +124,7 @@ class NormVerteilungUF(UtilityFunction):
             self.sigma = sigma
         else:
             self.sigma = 0.1
-        self.f = lambda x: 1 / (self.sigma * math.sqrt(2 * math.pi)) * math.e ** (-0.5 * (x / self.sigma) ** 2)
+        self.f = lambda x: (1 / (self.sigma * math.sqrt(2 * math.pi))) * math.e ** (-0.5 * (x / self.sigma) ** 2)
 
     def apply(self, x):
         return self.f(x) / self.f(0)
