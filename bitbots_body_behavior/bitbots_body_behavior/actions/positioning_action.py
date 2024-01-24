@@ -28,7 +28,7 @@ class PositioningAction(Action):
         offensiveness = Offensiveness.get_utility_value(new_state)
         defensiveness = Defensiveness.get_utility_value(new_state)
 
-        return OrCombinator.apply([offensiveness, defensiveness])
+        return 0.7 * OrCombinator.apply([offensiveness, defensiveness])
 
     def next_states_to_evaluate(self, state: State) -> list[State]:
         # generate the next possible positions in a circle around the current position

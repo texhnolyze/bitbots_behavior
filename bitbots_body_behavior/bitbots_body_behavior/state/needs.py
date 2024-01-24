@@ -17,9 +17,10 @@ class Needs:
         self.BALL_SEEN = BallSeenNeed(blackboard)
         self.CLOSEST_TO_BALL = ClosestToBallNeed(blackboard)
         self.HAS_BALL = HasBallNeed(blackboard)
+        self.READY_STATE = ReadyStateNeed(blackboard)
 
     def all(self):
-        return [self.ABLE_TO_MOVE, self.BALL_SEEN, self.CLOSEST_TO_BALL, self.HAS_BALL]
+        return [self.ABLE_TO_MOVE, self.BALL_SEEN, self.CLOSEST_TO_BALL, self.HAS_BALL, self.READY_STATE]
 
     def available(self) -> list[Need]:
         return list(filter(lambda need: need.available(), self.all()))
@@ -64,5 +65,15 @@ class HasBallNeed(Need):
         self.blackboard: BodyBlackboard = blackboard
 
     def available(self) -> bool:
-        return self.blackboard.world_model.get_ball_distance() <= self.blackboard.config.get("ball_reapproach_dist") \
+        return (
+            self.blackboard.world_model.get_ball_distance() <= self.blackboard.config.get("ball_reapproach_dist")
             and self.blackboard.world_model.get_ball_angle() <= math.pi / 8
+        )
+
+
+class ReadyStateNeed(Need):
+    def __init__(self, blackboard: BodyBlackboard) -> None:
+        self.blackboard: BodyBlackboard = blackboard
+
+    def available(self) -> bool:
+        return self.blackboard.gamestate.get_gamestate() == GameState.GAMESTATE_READY
