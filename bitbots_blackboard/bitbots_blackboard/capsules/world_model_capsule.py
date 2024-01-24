@@ -175,7 +175,7 @@ class WorldModelCapsule:
                 ball, self.base_footprint_frame, timeout=Duration(seconds=0.2)
             ).point
         except tf2.ExtrapolationException as e:
-            self._blackboard.node.get_logger().warn(e)
+            self._blackboard.node.get_logger().warn(str(e))
             self._blackboard.node.get_logger().error("Severe transformation problem concerning the ball!")
             return None
         return ball_bfp.x, ball_bfp.y
@@ -352,6 +352,7 @@ class WorldModelCapsule:
         transform = self.get_current_position_transform(frame_id or self.map_frame)
         if transform is None:
             return None
+
         theta = euler_from_quaternion(numpify(transform.transform.rotation))[2]
         return transform.transform.translation.x, transform.transform.translation.y, theta
 
@@ -364,6 +365,7 @@ class WorldModelCapsule:
         transform = self.get_current_position_transform(frame_id or self.map_frame)
         if transform is None:
             return None
+
         ps = PoseStamped()
         ps.header = transform.header
         ps.pose.position = msgify(Point, numpify(transform.transform.translation))
@@ -425,9 +427,12 @@ class WorldModelCapsule:
     # Common #
     ##########
 
-    def get_uv_from_xy(self, x, y) -> Tuple[float, float]:
+    def get_uv_from_xy(self, x, y) -> Optional[Tuple[float, float]]:
         """Returns the relativ positions of the robot to this absolute position"""
         current_position = self.get_current_position()
+        if current_position is None:
+            return None
+
         x2 = x - current_position[0]
         y2 = y - current_position[1]
         theta = -1 * current_position[2]
@@ -435,15 +440,21 @@ class WorldModelCapsule:
         v = math.cos(theta) * y2 - math.sin(theta) * x2
         return u, v
 
-    def get_xy_from_uv(self, u, v):
+    def get_xy_from_uv(self, u, v) -> Optional[Tuple[float, float]]:
         """Returns the absolute position from the given relative position to the robot"""
-        pos_x, pos_y, theta = self.get_current_position()
+        current_position = self.get_current_position()
+        if current_position is None:
+            return None
+
+        pos_x, pos_y, theta = current_position
         angle = math.atan2(v, u) + theta
         hypotenuse = math.hypot(u, v)
         return pos_x + math.sin(angle) * hypotenuse, pos_y + math.cos(angle) * hypotenuse
 
-    def get_distance_to_xy(self, x, y):
+    def get_distance_to_xy(self, x, y) -> Optional[float]:
         """Returns distance from robot to given position"""
-        u, v = self.get_uv_from_xy(x, y)
-        dist = math.hypot(u, v)
-        return dist
+        uv = self.get_uv_from_xy(x, y)
+        if uv is None:
+            return None
+
+        return math.hypot(uv[0], uv[1])

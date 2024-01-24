@@ -1,6 +1,7 @@
 from copy import copy
 from typing import Tuple
 
+import numpy as np
 from geometry_msgs.msg import Pose
 from ros2_numpy import numpify
 from tf_transformations import euler_from_quaternion
@@ -24,10 +25,8 @@ class State:
         self.time_to_ball = self.blackboard.pathfinding.calculate_time_to_ball()
 
         # opponent goal properties
-        self.map_based_opp_goal_distance = self.blackboard.world_model.get_map_based_opp_goal_distance()
-        self.map_based_opp_goal_center_uv = self.blackboard.world_model.get_map_based_opp_goal_center_uv()
+        self.map_based_opp_goal_distance = self.blackboard.world_model.get_map_based_opp_goal_distance() or np.inf
         self.map_based_opp_goal_center_xy = self.blackboard.world_model.get_map_based_opp_goal_center_xy()
-        self.map_based_own_goal_center_uv = self.blackboard.world_model.get_map_based_own_goal_center_uv()
         self.map_based_own_goal_center_xy = self.blackboard.world_model.get_map_based_own_goal_center_xy()
 
         # gamestate properties
