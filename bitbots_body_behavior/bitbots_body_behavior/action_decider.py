@@ -1,6 +1,7 @@
 from typing import Optional
 
 from rclpy.impl.rcutils_logger import RcutilsLogger as Logger
+from rclpy.node import Node
 
 from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_body_behavior.evaluation import Evaluation, EvaluationResult, Evaluator
@@ -13,12 +14,14 @@ from .state.state import State
 class ActionDecider:
     def __init__(
         self,
+        node: Node,
         blackboard: BodyBlackboard,
         state: State,
         needs: Needs,
         evaluator: Evaluator,
         logger: Logger,
     ):
+        self.node = node
         self.blackboard = blackboard
         self.state = state
         self.needs = needs
@@ -33,11 +36,11 @@ class ActionDecider:
 
     def setup_actions(self) -> list[Action]:
         return [
-            StandAction(self.needs),
-            RolePositionAction(self.needs),
-            PositioningAction(self.needs),
-            GoToBallAction(self.needs),
-            DribbleAction(self.needs),
+            StandAction(self.needs, self.node),
+            RolePositionAction(self.needs, self.node),
+            PositioningAction(self.needs, self.node),
+            GoToBallAction(self.needs, self.node),
+            DribbleAction(self.needs, self.node),
         ]
 
     def update_state(self):

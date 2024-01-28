@@ -3,6 +3,7 @@ from typing import Optional
 import numpy as np
 from bitbots_msgs.msg import HeadMode
 from geometry_msgs.msg import Twist
+from rclpy.node import Node
 
 from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_body_behavior.state.needs import Need, Needs
@@ -12,7 +13,8 @@ from .action import Action
 
 
 class DribbleAction(Action):
-    def __init__(self, needs: Needs):
+    def __init__(self, needs: Needs, node: Node):
+        super().__init__(needs, node)
         self.needs: list[Need] = [needs.ABLE_TO_MOVE, needs.BALL_SEEN, needs.HAS_BALL]
 
     def evaluate(self, state: State) -> float:

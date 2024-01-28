@@ -1,4 +1,5 @@
 from bitbots_msgs.msg import HeadMode
+from rclpy.node import Node
 
 from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_body_behavior.state.needs import Need, Needs
@@ -8,11 +9,12 @@ from .action import Action
 
 
 class StandAction(Action):
-    def __init__(self, needs: Needs):
+    def __init__(self, needs: Needs, node: Node):
+        super().__init__(needs, node)
         self.needs: list[Need] = []
         self.able_to_move = needs.ABLE_TO_MOVE.available
 
-    def evaluate(self, state: State, new_state: State) -> float:
+    def evaluate(self, _: State, new_state: State) -> float:
         if not self.able_to_move() and new_state.head_mode == HeadMode.LOOK_FORWARD:
             return 1.0
         else:

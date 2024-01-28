@@ -36,7 +36,7 @@ class BodyBehavior:
     def setup_action_decider(self):
         state = State(self.blackboard)
         needs = Needs(self.blackboard)
-        self.decider = ActionDecider(self.blackboard, state, needs, SyncEvaluator(), self.node.get_logger())
+        self.decider = ActionDecider(self.node, self.blackboard, state, needs, SyncEvaluator(), self.node.get_logger())
 
     # def setup_dsd(self):
     #     self.dsd = DSD(

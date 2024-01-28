@@ -3,6 +3,7 @@ from typing import Optional
 from bitbots_msgs.msg import HeadMode
 from geometry_msgs.msg import Vector3
 from rclpy.duration import Duration
+from rclpy.node import Node
 from std_msgs.msg import ColorRGBA
 from visualization_msgs.msg import Marker
 
@@ -22,17 +23,22 @@ from .action import Action
 
 
 class GoToBallAction(Action):
-    def __init__(self, needs: Needs):
+    def __init__(self, needs: Needs, node: Node):
+        super().__init__(needs, node)
         self.needs: list[Need] = [needs.ABLE_TO_MOVE, needs.BALL_SEEN, needs.CLOSEST_TO_BALL]
 
     def evaluate(self, state: State) -> float:
-        pressing = Pressing.get_utility_value(state)
-        ball_closeness = BallCloseness.get_utility_value(state)
+        pressing = Pressing.get_utility_value(state, self)
+        ball_closeness = BallCloseness.get_utility_value(state, self)
         ball_consideration = Prioritization.apply([pressing, ball_closeness], [2, 8])
+        self.publish_consideration_utility("ball_consideration", ball_consideration)
 
-        game_pressure = GamePressure.get_utility_value(state)
+        game_pressure = GamePressure.get_utility_value(state, self)
 
-        return OrCombinator.apply([ball_consideration, game_pressure])
+        utility = OrCombinator.apply([ball_consideration, game_pressure])
+        self.publish_consideration_utility("utility", utility)
+
+        return utility
 
     def execute(self, blackboard: BodyBlackboard, _: Optional[State]):
         approach_distance = blackboard.config.get("ball_approach_dist", 0.0)

@@ -1,4 +1,5 @@
 from bitbots_msgs.msg import HeadMode
+from rclpy.node import Node
 from tf2_geometry_msgs import PoseStamped
 
 from bitbots_blackboard.blackboard import BodyBlackboard
@@ -9,7 +10,8 @@ from .action import Action
 
 
 class RolePositionAction(Action):
-    def __init__(self, needs: Needs):
+    def __init__(self, needs: Needs, node: Node):
+        super().__init__(needs, node)
         self.needs: list[Need] = [needs.READY_STATE]
         self.ready_state = needs.READY_STATE.available
 

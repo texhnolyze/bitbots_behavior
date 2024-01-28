@@ -5,6 +5,7 @@ import numpy as np
 from bitbots_msgs.msg import HeadMode
 from bitbots_utils.transforms import quat_from_yaw
 from geometry_msgs.msg import PoseStamped
+from rclpy.node import Node
 
 from bitbots_blackboard.blackboard import BodyBlackboard
 from bitbots_body_behavior.considerations.defensiveness import Defensiveness
@@ -21,14 +22,18 @@ Point = Tuple[float, float, float]
 
 
 class PositioningAction(Action):
-    def __init__(self, needs: Needs):
+    def __init__(self, needs: Needs, node: Node):
+        super().__init__(needs, node)
         self.needs: list[Need] = [needs.ABLE_TO_MOVE]
 
     def evaluate(self, _: State, new_state: State) -> float:
-        offensiveness = Offensiveness.get_utility_value(new_state)
-        defensiveness = Defensiveness.get_utility_value(new_state)
+        offensiveness = Offensiveness.get_utility_value(new_state, self)
+        defensiveness = Defensiveness.get_utility_value(new_state, self)
 
-        return 0.7 * OrCombinator.apply([offensiveness, defensiveness])
+        utility = 0.7 * OrCombinator.apply([offensiveness, defensiveness])
+        self.publish_consideration_utility("utility", utility)
+
+        return utility
 
     def next_states_to_evaluate(self, state: State) -> list[State]:
         # generate the next possible positions in a circle around the current position
